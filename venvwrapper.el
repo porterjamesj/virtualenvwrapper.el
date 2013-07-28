@@ -91,8 +91,7 @@ we weren't in a virtualenv."
       (comint-send-string "*shell*" (concat "workon " venv-current-name "\n"))
       (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
       (setenv "VIRTUAL_ENV" venv-current-dir)))
-    (ad-activate 'shell)
-    (ad-activate 'make-comint-in-buffer))
+    (ad-activate 'shell))
 
 (provide 'venvwrapper)
 ;;; venvwrapper.el ends here
