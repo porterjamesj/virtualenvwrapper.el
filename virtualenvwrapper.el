@@ -1,18 +1,29 @@
-;;; virtualenvwrapper.el -- a modern venv tool for Emacs
+;;; virtualenvwrapper.el -- a modern virtualenv tool for Emacs
 
 ;; Copyright (C) 2013 James J Porter
 ;; Author: James J Porter <porterjamesj@gmail.com>
 
 ;;; Commentary:
-;; The python situation in Emacs has historically been a mess, but
-;; with the adoption of Fabián Gallina's python.el as the canonical
-;; python major mode, hopefully this will be fixed soon.  The out of
-;; the box virtualenv support in python.el, however, doesn't do quite
-;; everything I want.  virtualenv.el has been historically been the
-;; tool for this, but it's hundreds of lines of code, many of which
-;; are there for supporting the legacy python modes.  I wanted a
-;; minimal mode for working with virtualenvs that works effectively
-;; with the new python.el and only with the new python.el; here it is.
+;; I really like the new python.el, but virtualenv.el
+;; is built for old python.el and python-mode.el. I don't
+;; care about the code supporting those; virtualenv.el
+;; also doesn't work correctly with. M-x shell and eshell.
+;; This is my attempt to make a mode that supports only the
+;; new python.el and gives a smooth workflow with the python
+;; shell, M-x shell, and M-x eshell, as well as running shell
+;; commands with M-! or what have you.
+
+;;; TODO:
+;; 1. I would like to eventually support some of the virtualenvwrapper
+;;    operations: lsvirtualenv, mkvirtualenv, rmvirtualenv, etc. This
+;;    shouldn't be too difficult to implement.
+;; 2. I would also like to make the way this handles M-x shell a bit less
+;;    hacky. It's currently not POSIX compliant, just feels like the
+;;    wrong thing to do, and looks weird when you open a shell to
+;;    boot. The only alternative I can see, however, would be to
+;;    basically reimplement everything vitrualenvwrapper > workon does in
+;;    elisp, which seems like a waste of time.
+
 
 ;;; Code:
 
