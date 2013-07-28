@@ -26,8 +26,6 @@
 
 (defvar venv-current-dir nil "Directory of current virtualenv.")
 
-(defvar venv-wrapper t "Whether or not you use the virtualenv wrapper.")
-
 (defun venv-deactivate ()
   "Deactivate the current venv."
   (interactive)
@@ -52,39 +50,43 @@ we weren't in a virtualenv."
   (s-join ":" (-filter (lambda (s) (not (s-contains? venv-dir s)))
                        (s-split ":" (getenv "PATH")))))
 
-(defun venv-workon ()
+(defun venv-workon (&optional venv-to-switch-to)
   "Interactively switch to a virtualenv."
   (interactive)
   ;; first deactivate
   (venv-deactivate)
-  ;; now find completions and prompt for one
+  (if venv-to-switch-to
+      ;; if called with argument, make sure it is valid
+      (progn
+        (when (not (-contains? (venv-get-candidates venv-dir) venv-to-switch-to))
+          (error "Invalid virtualenv specified!"))
+        ;; then switch to it
+        (setq venv-current-name venv-to-switch-to))
+    ;; if called without argument, prompt for completion
   (setq venv-current-name
           (completing-read "Switch to virtualenv: "
                            (venv-get-candidates venv-dir) nil t nil
                            'venv-history
-                           (car venv-history)))
+                           (car venv-history))))
   (setq venv-current-dir
-         (file-name-as-directory
-          (concat (file-name-as-directory venv-dir) venv-current-name)))
-    (message venv-current-name)
-    ;; push it onto the history
-    (add-to-list 'venv-history venv-current-name)
-    ;; setup the python shell
-    (setq python-shell-virtualenv-path venv-current-dir)
-    ;; setup emacs exec-path
-    (add-to-list 'exec-path (concat venv-current-dir "bin"))
-    ;; setup the environment for subprocesses
-    (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
-    (setenv "VIRTUAL_ENV" venv-current-dir))
+        (file-name-as-directory
+         (concat (file-name-as-directory venv-dir) venv-current-name)))
+  (message venv-current-name)
+  ;; push it onto the history
+  (add-to-list 'venv-history venv-current-name)
+  ;; setup the python shell
+  (setq python-shell-virtualenv-path venv-current-dir)
+  ;; setup emacs exec-path
+  (add-to-list 'exec-path (concat venv-current-dir "bin"))
+  ;; setup the environment for subprocesses
+  (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
+  (setenv "VIRTUAL_ENV" venv-current-dir))
 
 
 ;; Advice for the shell so it doesn't blow up
 
-(append-to-buffer process "\n")
-
 (defun venv-start-shell (process)
-  "Startup the current virtualenv in a newly
-opened shell."
+  "Startup the current virtualenv in a newly opened shell."
   (comint-send-string
    process
    (concat "if command -v workon >/dev/null 2>&1; then workon "
@@ -111,3 +113,5 @@ opened shell."
 
 (provide 'venvwrapper)
 ;;; venvwrapper.el ends here
+
+(getenv "a")
