@@ -35,7 +35,9 @@
   (setq exec-path (-filter (lambda (s) (not (s-contains? venv-dir s)))
                            exec-path))
   (setenv "PATH" (venv-get-stripped-path))
-  (setenv "VIRTUAL_ENV" nil))
+  (setenv "VIRTUAL_ENV" nil)
+  (setq venv-current-name nil)
+  (setq venv-current-dir nil))
 
 (defun venv-get-candidates (dir)
   "Given a directory containing virtualenvs, return a list
@@ -45,7 +47,7 @@ of candidates to match against in the completion."
              (directory-files proper-dir nil "^[^.]"))))
 
 (defun venv-get-stripped-path ()
-  "Returns what the PATH environment variable would look like if
+  "Return what the PATH environment variable would look like if
 we weren't in a virtualenv."
   (s-join ":" (-filter (lambda (s) (not (s-contains? venv-dir s)))
                        (s-split ":" (getenv "PATH")))))
@@ -78,20 +80,34 @@ we weren't in a virtualenv."
 
 ;; Advice for the shell so it doesn't blow up
 
-(when venv-wrapper
-  (defadvice shell (before strip-env ())
-    "Use the environment without the venv to start up a new shell."
-    (when (not (get-buffer "*shell*"))
-        (setenv "PATH" (venv-get-stripped-path))
-        (setenv "VIRTUAL_ENV" nil)))
-  (defadvice make-comint-in-buffer (after restore-env ())
-    "Tell the shell to turn the virtualenv on and
-     restore the environment in emacs."
-    (when (get-buffer "*shell*")
-      (comint-send-string "*shell*" (concat "workon " venv-current-name "\n"))
-      (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
-      (setenv "VIRTUAL_ENV" venv-current-dir)))
-    (ad-activate 'shell))
+(append-to-buffer process "\n")
+
+(defun venv-start-shell (process)
+  "Startup the current virtualenv in a newly
+opened shell."
+  (comint-send-string
+   process
+   (concat "if command -v workon >/dev/null 2>&1; then workon "
+           venv-current-name
+           "; else source "
+           venv-current-dir
+           "bin/activate; fi \n")))
+
+
+(defadvice shell (around strip-env ())
+  "Use the environment without the venv to start up a new shell."
+  (let* ((buffer-name (or buffer "*shell*"))
+         (buffer-exists-already (get-buffer buffer-name)))
+    (if (or buffer-exists-already (not venv-current-name))
+        ad-do-it
+      (progn (setenv "PATH" (venv-get-stripped-path))
+             (setenv "VIRTUAL_ENV" nil)
+             ad-do-it
+             (comint-send-string buffer-name
+                                 (concat "workon " venv-current-name "\n"))
+             (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
+             (setenv "VIRTUAL_ENV" venv-current-dir)))))
+(ad-activate 'shell)
 
 (provide 'venvwrapper)
 ;;; venvwrapper.el ends here
