@@ -134,6 +134,12 @@ we weren't in a virtualenv."
                       (lambda (s) (not (s-equals? s name))) venv-history))
   (message (concat "Deleted virtualenv: " name)))
 
+(defun venv-lsvirtualenv ()
+  "List all available virtualenvs in a temp buffer."
+  (interactive)
+  (with-output-to-temp-buffer
+      "*Virtualenvs*"
+      (princ (s-join "\n" (venv-get-candidates venv-dir)))))
 
 ;; Advice for the shell so it doesn't blow up
 
