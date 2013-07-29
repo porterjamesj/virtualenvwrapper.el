@@ -31,14 +31,16 @@
   (expand-file-name "~/.virtualenvs/")
   "The directory in which your virtualenvs are located.")
 
-(defvar venv-history nil "History of venvs switched to.")
+(defvar venv-history nil "The last venv we worked on.")
 
 (defvar venv-current-name nil "Name of current virtualenv.")
 
 (defvar venv-current-dir nil "Directory of current virtualenv.")
 
-(defvar venv-configure-shell t)
-(defvar venv-configure-eshell t)
+(defcustom venv-configure-shell t "Whether to enable virtualenv support
+for M-x shell.")
+(defcustom venv-configure-eshell t "Whether to enable virtulenv support
+for M-x ehell.")
 
 (defun venv-deactivate ()
   "Deactivate the current venv."
