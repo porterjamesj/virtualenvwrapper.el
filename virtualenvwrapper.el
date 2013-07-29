@@ -165,6 +165,21 @@ a new location. Use with caution."
                     (concat proper-dir newname))
     (venv-workon newname)))
 
+(defmacro venv-with-virtualenv (name &rest forms)
+  "Evaluate FORMS with venv NAME active. NAME is a string
+identifying a virtualenv."
+  `(progn
+     (venv-workon ,name)
+     ,@forms
+     (venv-deactivate)))
+
+(defmacro venv-allvirtualenv (&rest forms)
+  "For each virtualenv, activate it, switch to it's directory,
+and then evaluate FORMS."
+  `(-map (lambda (name)
+           (venv-with-virtualenv name
+                                 ,@forms))
+         (venv-get-candidates venv-dir)))
 
 ;; Advice for the shell so it doesn't blow up
 
