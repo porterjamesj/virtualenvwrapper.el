@@ -141,6 +141,15 @@ we weren't in a virtualenv."
       "*Virtualenvs*"
       (princ (s-join "\n" (venv-get-candidates venv-dir)))))
 
+(defun venv-cdvirtualenv (&optional subdir)
+  "Change to the directory of a virtualenv. If
+SUBDIR is passed, append that to the path such that
+we are immediately in that directory."
+  (interactive)
+  (if venv-current-dir
+      (cd (concat (file-name-as-directory venv-current-dir) subdir))
+    (error "No virtualenv is currently active.")))
+
 ;; Advice for the shell so it doesn't blow up
 
 (defun venv-shell-init (process)
