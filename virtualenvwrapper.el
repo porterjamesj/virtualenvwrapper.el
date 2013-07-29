@@ -5,9 +5,9 @@
 
 ;;; Commentary:
 ;; I really like the new python.el, but virtualenv.el
-;; is built for old python.el and python-mode.el. I don't
+;; is built for old python.el and python-mode.el.  I don't
 ;; care about the code supporting those; virtualenv.el
-;; also doesn't work correctly with. M-x shell and eshell.
+;; also doesn't work correctly with M-x shell and eshell.
 ;; This is my attempt to make a mode that supports only the
 ;; new python.el and gives a smooth workflow with the python
 ;; shell, M-x shell, and M-x eshell, as well as running shell
