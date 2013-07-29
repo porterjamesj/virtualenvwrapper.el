@@ -110,6 +110,30 @@ we weren't in a virtualenv."
   (setq eshell-path-env (getenv "PATH"))
   (message (concat "Switched to virtualenv: " venv-current-name)))
 
+(defun venv-mkvirtualenv (&optional name)
+  (interactive)
+  (when (not name)
+    (setq name (read-from-minibuffer "New virtualenv: ")))
+  ;; error if this env already exist
+  (when (-contains? (venv-get-candidates venv-dir) name)
+    (error "A virtualenv with this name already exists!"))
+  ;; should this be asynchronous?
+  (shell-command (concat "virtualenv " venv-dir name)))
+
+(defun venv-rmvirtualenv (&optional name)
+  (interactive)
+  ;; deactivate first
+  (venv-deactivate)
+  (if name
+      (when (not (venv-is-valid name))
+        (error "Invalid virtualenv specified!"))
+    (setq name (venv-read-name "Virtualenv to delete: ")))
+  (delete-directory (concat venv-dir name) t)
+  ;; get it out of the history so it doesn't show up in completing reads
+  (setq venv-history (-filter
+                      (lambda (s) (not (s-equals? s name))) venv-history))
+  (message (concat "Deleted virtualenv: " name)))
+
 
 ;; Advice for the shell so it doesn't blow up
 
