@@ -14,15 +14,12 @@
 ;; commands with M-! or what have you.
 
 ;;; TODO:
-;; 1. I would like to eventually support some of the virtualenvwrapper
-;;    operations: lsvirtualenv, mkvirtualenv, rmvirtualenv, etc. This
-;;    shouldn't be too difficult to implement.
-;; 2. I would also like to make the way this handles M-x shell a bit less
-;;    hacky. It's currently not POSIX compliant, just feels like the
-;;    wrong thing to do, and looks weird when you open a shell to
-;;    boot. The only alternative I can see, however, would be to
-;;    basically reimplement everything vitrualenvwrapper > workon does in
-;;    elisp, which seems like a waste of time.
+;; I would also like to make the way this handles M-x shell a bit less
+;; hacky. It's currently not POSIX compliant, just feels like the
+;; wrong thing to do, and looks weird when you open a shell to
+;; boot. The only alternative I can see, however, would be to
+;; basically reimplement everything vitrualenvwrapper > workon does in
+;; elisp, which seems like a waste of time.
 
 
 ;;; Code:
