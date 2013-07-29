@@ -68,28 +68,35 @@ we weren't in a virtualenv."
   (s-join ":" (-filter (lambda (s) (not (s-contains? venv-dir s)))
                        (s-split ":" (getenv "PATH")))))
 
-(defun venv-workon (&optional venv-to-switch-to)
+(defun venv-is-valid (name)
+  "Test if a venv named NAME exists in the venv-dir"
+  (-contains? (venv-get-candidates venv-dir) name))
+
+(defun venv-read-name (prompt)
+  "Do a completing read to get the name of a candidate."
+  (completing-read prompt
+                   (venv-get-candidates venv-dir) nil t nil
+                   'venv-history
+                   (car venv-history)))
+
+(defun venv-workon (&optional name)
   "Interactively switch to a virtualenv."
   (interactive)
   ;; first deactivate
   (venv-deactivate)
-  (if venv-to-switch-to
+  (if name
       ;; if called with argument, make sure it is valid
       (progn
-        (when (not (-contains? (venv-get-candidates venv-dir) venv-to-switch-to))
+        (when (not (venv-is-valid name))
           (error "Invalid virtualenv specified!"))
         ;; then switch to it
-        (setq venv-current-name venv-to-switch-to))
+        (setq venv-current-name name))
     ;; if called without argument, prompt for completion
   (setq venv-current-name
-          (completing-read "Switch to virtualenv: "
-                           (venv-get-candidates venv-dir) nil t nil
-                           'venv-history
-                           (car venv-history))))
+          (venv-read-name "Virtualenv to switch to: ")))
   (setq venv-current-dir
         (file-name-as-directory
          (concat (file-name-as-directory venv-dir) venv-current-name)))
-  (message venv-current-name)
   ;; push it onto the history
   (add-to-list 'venv-history venv-current-name)
   ;; setup the python shell
