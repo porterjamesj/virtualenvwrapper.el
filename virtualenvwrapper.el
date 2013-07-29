@@ -215,7 +215,13 @@ and then evaluate FORMS."
     (ad-activate 'shell))
   (when venv-configure-eshell
     (defun eshell/workon (arg) (venv-workon arg))
-    (defun eshell/deactivate () (venv-deactivate))))
+    (defun eshell/deactivate () (venv-deactivate))
+    (defun eshell/rmvirtualenv (arg) (venv-rmvirtualenv arg))
+    (defun eshell/mkvirtualenv (arg) (venv-mkvirtualenv arg))
+    (defun eshell/cpvirtualenv (arg) (venv-cpvirtualenv arg))
+    (defun eshell/cdvirtualenv (&optional arg) (venv-cdvirtualenv arg))
+    (defun eshell/lsvirtualenv () (venv-list-virtualenvs))))
+
 
 (provide 'virtualenvwrapper)
 ;;; venvwrapper.el ends here
