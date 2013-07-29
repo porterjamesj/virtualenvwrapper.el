@@ -118,7 +118,7 @@ we weren't in a virtualenv."
   (when (-contains? (venv-get-candidates venv-dir) name)
     (error "A virtualenv with this name already exists!"))
   ;; should this be asynchronous?
-  (shell-command (concat "virtualenv " venv-dir name)))
+  (shell-command (concat "virtualenv " (file-name-as-directory venv-dir) name)))
 
 (defun venv-rmvirtualenv (&optional name)
   (interactive)
@@ -128,7 +128,7 @@ we weren't in a virtualenv."
       (when (not (venv-is-valid name))
         (error "Invalid virtualenv specified!"))
     (setq name (venv-read-name "Virtualenv to delete: ")))
-  (delete-directory (concat venv-dir name) t)
+  (delete-directory (concat (file-name-as-directory venv-dir) name) t)
   ;; get it out of the history so it doesn't show up in completing reads
   (setq venv-history (-filter
                       (lambda (s) (not (s-equals? s name))) venv-history))
@@ -149,6 +149,25 @@ we are immediately in that directory."
   (if venv-current-dir
       (cd (concat (file-name-as-directory venv-current-dir) subdir))
     (error "No virtualenv is currently active.")))
+
+(defun venv-cpvirtualenv (&optional name newname)
+  "Copy virtualenv NAME to NEWNAME. This comes with the
+same caveat as cpvirtualenv in the original virtualenvwrapper,
+which is that is far from guarenteed to work well. Many packages
+hardcode absolute paths in various places an will break if moved to
+a new location. Use with caution."
+  (interactive)
+  (let ((proper-dir (file-name-as-directory venv-dir)))
+    (when (not name) (setq name (venv-read-name "Virtualenv to copy from: ")))
+    (when (not newname) (setq newname
+                              (read-from-minibuffer "Virtualenv to copy to: ")))
+    ;; throw an error if newname already exists
+    (when (file-exists-p (concat proper-dir newname))
+      (error "A virtualenv with the proposed name already exists!"))
+    (copy-directory (concat proper-dir name)
+                    (concat proper-dir newname))
+    (venv-workon newname)))
+
 
 ;; Advice for the shell so it doesn't blow up
 
