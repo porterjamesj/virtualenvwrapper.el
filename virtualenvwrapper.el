@@ -24,9 +24,26 @@
 
 ;;; Code:
 
+;; customizable variables
+
+(defgroup virtualenvwrapper nil
+  "Virtualenvwrapper for Emacs."
+  :group 'python)
+
 (defcustom venv-dir
   (expand-file-name "~/.virtualenvs/")
-  "The directory in which your virtualenvs are located.")
+  "The directory in which your virtualenvs are located."
+  :group 'virtualenvwrapper)
+
+(defcustom venv-configure-shell t
+  "Whether to enable virtualenv support for M-x shell."
+  :group 'virtualenvwrapper)
+(defcustom venv-configure-eshell t
+  "Whether to enable virtulenv support for M-x ehell."
+  :group 'virtualenvwrapper)
+
+
+;; internal variables that you probably shouldn't mess with
 
 (defvar venv-history nil "The last venv we worked on.")
 
@@ -34,29 +51,18 @@
 
 (defvar venv-current-dir nil "Directory of current virtualenv.")
 
-(defcustom venv-configure-shell t "Whether to enable virtualenv support
-for M-x shell.")
-(defcustom venv-configure-eshell t "Whether to enable virtulenv support
-for M-x ehell.")
 
-(defun venv-deactivate ()
-  "Deactivate the current venv."
-  (interactive)
-  (setq python-shell-virtualenv-path nil)
-  (setq exec-path (-filter (lambda (s) (not (s-contains? venv-dir s)))
-                           exec-path))
-  (setenv "PATH" (venv-get-stripped-path))
-  (setenv "VIRTUAL_ENV" nil)
-  (setq venv-current-name nil)
-  (setq venv-current-dir nil)
-  (setq eshell-path-env (getenv "PATH"))
-  (message "virtualenv deactivated"))
+;; internal utility functions
 
 (defun venv-get-candidates (dir)
   "Given a directory containing virtualenvs, return a list
 of candidates to match against in the completion."
   (let ((proper-dir (file-name-as-directory dir)))
-    (-filter (lambda (s) (car (file-attributes (concat dir s))))
+    (-filter (lambda (s)
+               (let ((subdir (concat dir s)))
+                 (and (car (file-attributes subdir))
+                      (file-exists-p
+                       (concat (file-name-as-directory subdir) "bin")))))
              (directory-files proper-dir nil "^[^.]"))))
 
 (defun venv-get-stripped-path ()
@@ -75,6 +81,25 @@ we weren't in a virtualenv."
                    (venv-get-candidates venv-dir) nil t nil
                    'venv-history
                    (car venv-history)))
+
+(defun venv-list-virtualenvs ()
+  (s-join "\n" (venv-get-candidates venv-dir)))
+
+
+;; potentially interactive user-exposed functions
+
+(defun venv-deactivate ()
+  "Deactivate the current venv."
+  (interactive)
+  (setq python-shell-virtualenv-path nil)
+  (setq exec-path (-filter (lambda (s) (not (s-contains? venv-dir s)))
+                           exec-path))
+  (setenv "PATH" (venv-get-stripped-path))
+  (setenv "VIRTUAL_ENV" nil)
+  (setq venv-current-name nil)
+  (setq venv-current-dir nil)
+  (setq eshell-path-env (getenv "PATH"))
+  (message "virtualenv deactivated"))
 
 (defun venv-workon (&optional name)
   "Interactively switch to a virtualenv."
@@ -131,10 +156,6 @@ we weren't in a virtualenv."
                       (lambda (s) (not (s-equals? s name))) venv-history))
   (message (concat "Deleted virtualenv: " name)))
 
-
-(defun venv-list-virtualenvs ()
-  (s-join "\n" (venv-get-candidates venv-dir)))
-
 (defun venv-lsvirtualenv ()
   "List all available virtualenvs in a temp buffer."
   (interactive)
@@ -174,18 +195,38 @@ a new location. Use with caution."
 identifying a virtualenv."
   `(progn
      (venv-workon ,name)
+     (cd venv-current-dir)
      ,@forms
      (venv-deactivate)))
 
 (defmacro venv-allvirtualenv (&rest forms)
   "For each virtualenv, activate it, switch to it's directory,
 and then evaluate FORMS."
-  `(-map (lambda (name)
-           (venv-with-virtualenv name
-                                 ,@forms))
-         (venv-get-candidates venv-dir)))
+  `(progn
+     (-map (lambda (name)
+             (venv-with-virtualenv name
+                                   ,@forms))
+           (venv-get-candidates venv-dir))
+     (message "Ran command in all virtualenvs.")))
 
-;; Advice for the shell so it doesn't blow up
+(defun venv-with-venv-shell-command (name command)
+  "Execute the string COMMAND in virtualenv NAME."
+  (venv-with-virtualenv name
+                        (shell-command command)))
+
+(defun venv-allvirtualenv-shell-command (&optional command)
+  "Just like venv-allvirtulenv, but executes a shell
+command (COMMAND) rather than elisp forms."
+  (interactive)
+  (when (not command)
+    (setq command (read-from-minibuffer "Shell command to execute: ")))
+  (-map (lambda (name)
+          (venv-with-venv-shell-command name command))
+        (venv-get-candidates venv-dir))
+  (message (concat "Executed " command " in all virtualenvs")))
+
+
+;; Code for setting up shell and eshell
 
 (defun venv-shell-init (process)
   "Startup the current virtualenv in a newly opened shell."
@@ -196,7 +237,6 @@ and then evaluate FORMS."
            "; else source "
            venv-current-dir
            "bin/activate; fi \n")))
-
 
 (defun venv-initialize ()
   (when venv-configure-shell
@@ -220,7 +260,10 @@ and then evaluate FORMS."
     (defun eshell/mkvirtualenv (arg) (venv-mkvirtualenv arg))
     (defun eshell/cpvirtualenv (arg) (venv-cpvirtualenv arg))
     (defun eshell/cdvirtualenv (&optional arg) (venv-cdvirtualenv arg))
-    (defun eshell/lsvirtualenv () (venv-list-virtualenvs))))
+    (defun eshell/lsvirtualenv () (venv-list-virtualenvs))
+    (defun eshell/allvirtualenv (&rest command)
+      (venv-allvirtualenv-shell-command
+       (s-join " " (eshell-stringify-list command))))))
 
 
 (provide 'virtualenvwrapper)
