@@ -45,7 +45,7 @@
 
 ;; internal variables that you probably shouldn't mess with
 
-(defvar venv-history nil "The last venv we worked on.")
+(defvar venv-history nil "The history of venvs we have worked on.")
 
 (defvar venv-current-name nil "Name of current virtualenv.")
 
@@ -77,10 +77,12 @@ we weren't in a virtualenv."
 
 (defun venv-read-name (prompt)
   "Do a completing read to get the name of a candidate."
-  (completing-read prompt
-                   (venv-get-candidates venv-dir) nil t nil
-                   'venv-history
-                   (car venv-history)))
+  (let ((candidates (venv-get-candidates venv-dir)))
+    (completing-read prompt
+                     candidates nil t nil
+                     'venv-history
+                     (or (car venv-history)
+                         (car candidates)))))
 
 (defun venv-list-virtualenvs ()
   (s-join "\n" (venv-get-candidates venv-dir)))
@@ -190,8 +192,12 @@ a new location. Use with caution."
                     (concat proper-dir newname))
     (venv-workon newname)))
 
+
+;; macros and functions supporting executing elisp or
+;; shell commands in a particular venv
+
 (defmacro venv-with-virtualenv (name &rest forms)
-  "Evaluate FORMS with venv NAME active. NAME is a string
+  "Evaluate FORMS with venv NAME active. NAME must be a string
 identifying a virtualenv."
   `(progn
      (let ((prev-dir default-directory))
@@ -203,7 +209,7 @@ identifying a virtualenv."
        (message (concat "Evaluated in venv: " ,name)))))
 
 (defmacro venv-allvirtualenv (&rest forms)
-  "For each virtualenv, activate it, switch to it's directory,
+  "For each virtualenv, activate it, switch to its directory,
 and then evaluate FORMS."
   `(progn
      (-map (lambda (name)
