@@ -35,14 +35,6 @@
   "The directory in which your virtualenvs are located."
   :group 'virtualenvwrapper)
 
-(defcustom venv-configure-shell t
-  "Whether to enable virtualenv support for M-x shell."
-  :group 'virtualenvwrapper)
-(defcustom venv-configure-eshell t
-  "Whether to enable virtulenv support for M-x ehell."
-  :group 'virtualenvwrapper)
-
-
 ;; internal variables that you probably shouldn't mess with
 
 (defvar venv-history nil "The history of venvs we have worked on.")
@@ -50,7 +42,6 @@
 (defvar venv-current-name nil "Name of current virtualenv.")
 
 (defvar venv-current-dir nil "Directory of current virtualenv.")
-
 
 ;; internal utility functions
 
@@ -130,8 +121,6 @@ we weren't in a virtualenv."
   ;; setup the environment for subprocesses
   (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
   (setenv "VIRTUAL_ENV" venv-current-dir)
-  ;; set eshell path
-  (setq eshell-path-env (getenv "PATH"))
   (message (concat "Switched to virtualenv: " venv-current-name)))
 
 (defun venv-mkvirtualenv (&optional name)
@@ -142,7 +131,9 @@ we weren't in a virtualenv."
   (when (-contains? (venv-get-candidates venv-dir) name)
     (error "A virtualenv with this name already exists!"))
   ;; should this be asynchronous?
-  (shell-command (concat "virtualenv " (file-name-as-directory venv-dir) name)))
+  (shell-command (concat "virtualenv " (file-name-as-directory venv-dir) name))
+  (venv-workon name)
+  (message (concat "Created virtualenv: " name)))
 
 (defun venv-rmvirtualenv (&optional name)
   (interactive)
@@ -247,8 +238,7 @@ command (COMMAND) rather than elisp forms."
            venv-current-dir
            "bin/activate; fi \n")))
 
-(defun venv-initialize ()
-  (when venv-configure-shell
+(defun venv-initialize-interactive-shells ()
     (defadvice shell (around strip-env ())
       "Use the environment without the venv to start up a new shell."
       (let* ((buffer-name (or buffer "*shell*"))
@@ -262,17 +252,26 @@ command (COMMAND) rather than elisp forms."
                (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
                (setenv "VIRTUAL_ENV" venv-current-dir)))))
     (ad-activate 'shell))
-  (when venv-configure-eshell
-    (defun eshell/workon (arg) (venv-workon arg))
-    (defun eshell/deactivate () (venv-deactivate))
-    (defun eshell/rmvirtualenv (arg) (venv-rmvirtualenv arg))
-    (defun eshell/mkvirtualenv (arg) (venv-mkvirtualenv arg))
-    (defun eshell/cpvirtualenv (arg) (venv-cpvirtualenv arg))
-    (defun eshell/cdvirtualenv (&optional arg) (venv-cdvirtualenv arg))
-    (defun eshell/lsvirtualenv () (venv-list-virtualenvs))
-    (defun eshell/allvirtualenv (&rest command)
-      (venv-allvirtualenv-shell-command
-       (s-join " " (eshell-stringify-list command))))))
+
+(defun venv-initialize-eshell
+  ;; make emacs and eshell share an environment
+  (setq eshell-modify-global-environment t)
+  ;; set eshell path
+  (setq eshell-path-env (getenv "PATH"))
+  ;; alias functions
+  (defun eshell/workon (arg) (venv-workon arg))
+  (defun eshell/deactivate ()
+    (setenv "PATH" (venv-get-stripped-path))
+    (setenv "VIRTUAL_ENV" nil)
+    (message "virtualenv deactivated"))
+  (defun eshell/rmvirtualenv (arg) (venv-rmvirtualenv arg))
+  (defun eshell/mkvirtualenv (arg) (venv-mkvirtualenv arg))
+  (defun eshell/cpvirtualenv (arg) (venv-cpvirtualenv arg))
+  (defun eshell/cdvirtualenv (&optional arg) (venv-cdvirtualenv arg))
+  (defun eshell/lsvirtualenv () (venv-list-virtualenvs))
+  (defun eshell/allvirtualenv (&rest command)
+    (venv-allvirtualenv-shell-command
+     (s-join " " (eshell-stringify-list command)))))
 
 
 (provide 'virtualenvwrapper)
