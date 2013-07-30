@@ -194,10 +194,13 @@ a new location. Use with caution."
   "Evaluate FORMS with venv NAME active. NAME is a string
 identifying a virtualenv."
   `(progn
-     (venv-workon ,name)
-     (cd venv-current-dir)
-     ,@forms
-     (venv-deactivate)))
+     (let ((prev-dir default-directory))
+       (venv-workon ,name)
+       (cd venv-current-dir)
+       ,@forms
+       (venv-deactivate)
+       (cd prev-dir)
+       (message (concat "Evaluated in venv: " ,name)))))
 
 (defmacro venv-allvirtualenv (&rest forms)
   "For each virtualenv, activate it, switch to it's directory,
