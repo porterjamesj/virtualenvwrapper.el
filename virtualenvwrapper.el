@@ -30,10 +30,14 @@
   "Virtualenvwrapper for Emacs."
   :group 'python)
 
-(defcustom venv-dir
+(defcustom venv-location
   (expand-file-name "~/.virtualenvs/")
-  "The directory in which your virtualenvs are located."
+  "The location(s) of your virtualenvs. This
+can be either a string, which indicates a single directory in which
+you keep all your virutalenvs, or a list of strings, in which case it
+specifies disparate locations in which all your virtualenvs are kept."
   :group 'virtualenvwrapper)
+
 
 ;; internal variables that you probably shouldn't mess with
 
