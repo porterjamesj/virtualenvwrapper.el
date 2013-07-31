@@ -49,7 +49,47 @@ specifies disparate locations in which all your virtualenvs are kept."
 
 ;; internal utility functions
 
-(defun venv-get-candidates (dir)
+;; (setq venv-location '("/Users/james/.virtualenvs/base"
+;;                       "/Users/james/.virtualenvs/science/"))
+
+;; (venv-name-to-dir "science")
+
+(defun venv-dir-to-name (dir)
+  "Extract the name of a virtualenv from a path."
+  (car (last (-filter (lambda (s) (not (s-blank? s)))
+                 (s-split "/" dir)))))
+
+(defun venv-name-to-dir (name)
+  "Given the name of a virtualenv, translate it
+to the directory where that virtualenv is located."
+  (let ((potential-dir
+         (if (stringp venv-location)
+             (concat (file-name-as-directory venv-location) name)
+           (car (-filter
+                 (lambda (d)
+                   (s-equals? name (venv-dir-to-name d)))
+                 venv-location)))))
+    (if (and potential-dir
+             (file-exists-p potential-dir))
+        potential-dir
+      (error "No such virtualenv!"))))
+
+(defun venv-get-candidates ()
+  (if (stringp (type-of venv-location))
+      (venv-get-candidates-dir venv-location)
+    (venv-get-candidates-list venv-location)))
+
+
+(defun venv-get-candidates-list (list)
+  "Given a list of virtualenv directories,
+return a list of names that can be used in, e.g.
+a completing read."
+  (-map (lambda (dir)
+          (last (-filter (lambda (s) (not (s-blank? s)))
+                         (s-split "/" dir))))
+        list))
+
+(defun venv-get-candidates-dir (dir)
   "Given a directory containing virtualenvs, return a list
 of candidates to match against in the completion."
   (let ((proper-dir (file-name-as-directory dir)))
@@ -68,11 +108,11 @@ we weren't in a virtualenv."
 
 (defun venv-is-valid (name)
   "Test if a venv named NAME exists in the venv-dir"
-  (-contains? (venv-get-candidates venv-dir) name))
+  (-contains? (venv-get-candidates) name))
 
 (defun venv-read-name (prompt)
   "Do a completing read to get the name of a candidate."
-  (let ((candidates (venv-get-candidates venv-dir)))
+  (let ((candidates (venv-get-candidates)))
     (completing-read prompt
                      candidates nil t nil
                      'venv-history
@@ -80,7 +120,7 @@ we weren't in a virtualenv."
                          (car candidates)))))
 
 (defun venv-list-virtualenvs ()
-  (s-join "\n" (venv-get-candidates venv-dir)))
+  (s-join "\n" (venv-get-candidates)))
 
 
 ;; potentially interactive user-exposed functions
@@ -132,7 +172,7 @@ we weren't in a virtualenv."
   (when (not name)
     (setq name (read-from-minibuffer "New virtualenv: ")))
   ;; error if this env already exist
-  (when (-contains? (venv-get-candidates venv-dir) name)
+  (when (-contains? (venv-get-candidates) name)
     (error "A virtualenv with this name already exists!"))
   ;; should this be asynchronous?
   (shell-command (concat "virtualenv " (file-name-as-directory venv-dir) name))
@@ -210,7 +250,7 @@ and then evaluate FORMS."
      (-map (lambda (name)
              (venv-with-virtualenv name
                                    ,@forms))
-           (venv-get-candidates venv-dir))
+           (venv-get-candidates))
      (message "Ran command in all virtualenvs.")))
 
 (defun venv-with-venv-shell-command (name command)
@@ -226,7 +266,7 @@ command (COMMAND) rather than elisp forms."
     (setq command (read-from-minibuffer "Shell command to execute: ")))
   (-map (lambda (name)
           (venv-with-venv-shell-command name command))
-        (venv-get-candidates venv-dir))
+        (venv-get-candidates))
   (message (concat "Executed " command " in all virtualenvs")))
 
 
