@@ -47,6 +47,7 @@ specifies disparate locations in which all your virtualenvs are kept."
 
 (defvar venv-current-dir nil "Directory of current virtualenv.")
 
+
 ;; internal utility functions
 
 (defun venv-clear-history ()
@@ -192,7 +193,7 @@ virtualenv"
   (interactive)
   (when (not name)
     (setq name (read-from-minibuffer "New virtualenv: ")))
-  ;; error if this env already exist
+  ;; error if this env already exists
   (when (-contains? (venv-get-candidates) name)
     (error "A virtualenv with this name already exists!"))
   ;; should this be asynchronous?
@@ -227,7 +228,11 @@ SUBDIR is passed, append that to the path such that
 we are immediately in that directory."
   (interactive)
   (if venv-current-dir
-      (cd (concat (file-name-as-directory venv-current-dir) subdir))
+      (let ((going-to (concat (file-name-as-directory
+                               (expand-file-name venv-current-dir))
+                              subdir)))
+        (cd going-to)
+        (message (concat "Now in directory: " going-to)))
     (error "No virtualenv is currently active.")))
 
 (defun venv-cpvirtualenv (&optional name newname)
