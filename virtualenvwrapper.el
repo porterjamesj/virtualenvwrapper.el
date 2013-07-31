@@ -97,7 +97,8 @@ pass directories with are actually virtualenvs."
                                (s-split "/" dir)))))
          (-filter
           (lambda (s) (car (file-attributes
-                            (concat (file-name-as-directory s) "bin"))))
+                            (concat (file-name-as-directory
+                                     (expand-file-name s)) "bin"))))
                   list)))
 
 (defun venv-get-candidates-dir (dir)
@@ -191,15 +192,21 @@ virtualenv"
 
 (defun venv-mkvirtualenv (&optional name)
   (interactive)
-  (when (not name)
-    (setq name (read-from-minibuffer "New virtualenv: ")))
-  ;; error if this env already exists
-  (when (-contains? (venv-get-candidates) name)
-    (error "A virtualenv with this name already exists!"))
-  ;; should this be asynchronous?
-  (shell-command (concat "virtualenv " (file-name-as-directory venv-dir) name))
-  (venv-workon name)
-  (message (concat "Created virtualenv: " name)))
+  (let ((parent-dir (if (stringp venv-location)
+                        (file-name-as-directory
+                         (expand-file-name venv-location))
+                      default-directory)))
+    (when (not name)
+      (setq name (read-from-minibuffer "New virtualenv: ")))
+    ;; error if this env already exists
+    (when (-contains? (venv-get-candidates) name)
+      (error "A virtualenv with this name already exists!"))
+    ;; should this be asynchronous?
+    (shell-command (concat "virtualenv " parent-dir name))
+    (when (listp venv-location)
+        (add-to-list 'venv-location (concat parent-dir name)))
+    (venv-workon name)
+    (message (concat "Created virtualenv: " name))))
 
 (defun venv-rmvirtualenv (&optional name)
   (interactive)
@@ -209,10 +216,17 @@ virtualenv"
       (when (not (venv-is-valid name))
         (error "Invalid virtualenv specified!"))
     (setq name (venv-read-name "Virtualenv to delete: ")))
-  (delete-directory (concat (file-name-as-directory venv-dir) name) t)
+  (delete-directory (venv-name-to-dir name) t)
   ;; get it out of the history so it doesn't show up in completing reads
   (setq venv-history (-filter
                       (lambda (s) (not (s-equals? s name))) venv-history))
+  ;; if location is a list, delete it from the list
+  (when (listp venv-location)
+    (setq venv-location
+          (-filter (lambda (locs) (not (s-equals?
+                                        name
+                                        (venv-dir-to-name locs))))
+                   venv-location)))
   (message (concat "Deleted virtualenv: " name)))
 
 (defun venv-lsvirtualenv ()
@@ -223,7 +237,7 @@ virtualenv"
       (princ (venv-list-virtualenvs))))
 
 (defun venv-cdvirtualenv (&optional subdir)
-  "Change to the directory of a virtualenv. If
+  "Change to the directory of current virtualenv. If
 SUBDIR is passed, append that to the path such that
 we are immediately in that directory."
   (interactive)
@@ -240,17 +254,23 @@ we are immediately in that directory."
 same caveat as cpvirtualenv in the original virtualenvwrapper,
 which is that is far from guarenteed to work well. Many packages
 hardcode absolute paths in various places an will break if moved to
-a new location. Use with caution."
+a new location. Use with caution. If used with a single virtualenv
+directory, behaves just like cpvirtualenv in virtualenvwrapper.sh.
+If used with virtualenvs spread around the filesystem, creates the
+new virtualenv in the current default directory."
   (interactive)
-  (let ((proper-dir (file-name-as-directory venv-dir)))
+  (let ((parent-dir (if (stringp venv-location)
+                        (file-name-as-directory
+                         (expand-file-name venv-location))
+                      (default-directory))))
     (when (not name) (setq name (venv-read-name "Virtualenv to copy from: ")))
     (when (not newname) (setq newname
                               (read-from-minibuffer "Virtualenv to copy to: ")))
     ;; throw an error if newname already exists
-    (when (file-exists-p (concat proper-dir newname))
+    (when (file-exists-p (concat parent-dir newname))
       (error "A virtualenv with the proposed name already exists!"))
-    (copy-directory (concat proper-dir name)
-                    (concat proper-dir newname))
+    (copy-directory (venv-name-to-dir name)
+                    (concat parent-dir newname))
     (venv-workon newname)))
 
 
