@@ -49,10 +49,8 @@ specifies disparate locations in which all your virtualenvs are kept."
 
 ;; internal utility functions
 
-;; (setq venv-location '("/Users/james/.virtualenvs/base"
-;;                       "/Users/james/.virtualenvs/science/"))
-
-;; (venv-name-to-dir "science")
+(defun venv-clear-history ()
+  (setq venv-history nil))
 
 (defun venv-dir-to-name (dir)
   "Extract the name of a virtualenv from a path."
@@ -62,52 +60,72 @@ specifies disparate locations in which all your virtualenvs are kept."
 (defun venv-name-to-dir (name)
   "Given the name of a virtualenv, translate it
 to the directory where that virtualenv is located."
-  (let ((potential-dir
-         (if (stringp venv-location)
-             (concat (file-name-as-directory venv-location) name)
-           (car (-filter
-                 (lambda (d)
-                   (s-equals? name (venv-dir-to-name d)))
-                 venv-location)))))
-    (if (and potential-dir
-             (file-exists-p potential-dir))
-        potential-dir
-      (error "No such virtualenv!"))))
+  (file-name-as-directory
+   (let ((potential-dir
+          (if (stringp venv-location)
+              (concat (file-name-as-directory
+                       (expand-file-name venv-location)) name)
+            (car (-filter
+                  (lambda (d)
+                    (s-equals? name (venv-dir-to-name d)))
+                  venv-location)))))
+     (if (and potential-dir
+              (file-exists-p
+               (concat (file-name-as-directory
+                        (expand-file-name potential-dir)) "bin")))
+         (file-name-as-directory
+          (expand-file-name potential-dir))
+       (error (concat "No such virtualenv: " name))))))
 
 (defun venv-get-candidates ()
-  (if (stringp (type-of venv-location))
+  "Wrapper to call get-candidates-list or
+get-candidates-string depending on which
+is appropriate for how venv-location is
+specified."
+  (if (stringp venv-location)
       (venv-get-candidates-dir venv-location)
     (venv-get-candidates-list venv-location)))
-
 
 (defun venv-get-candidates-list (list)
   "Given a list of virtualenv directories,
 return a list of names that can be used in, e.g.
-a completing read."
-  (-map (lambda (dir)
-          (last (-filter (lambda (s) (not (s-blank? s)))
-                         (s-split "/" dir))))
-        list))
+a completing read. This trusts the caller to only
+pass directories with are actually virtualenvs."
+   (-map (lambda (dir)
+           (car (last (-filter (lambda (s) (not (s-blank? s)))
+                               (s-split "/" dir)))))
+         (-filter
+          (lambda (s) (car (file-attributes
+                            (concat (file-name-as-directory s) "bin"))))
+                  list)))
 
 (defun venv-get-candidates-dir (dir)
   "Given a directory containing virtualenvs, return a list
-of candidates to match against in the completion."
-  (let ((proper-dir (file-name-as-directory dir)))
+of names that can be used in the completing read."
+  (let ((proper-dir (file-name-as-directory (expand-file-name dir))))
     (-filter (lambda (s)
-               (let ((subdir (concat dir s)))
-                 (and (car (file-attributes subdir))
-                      (file-exists-p
+               (let ((subdir (concat proper-dir s)))
+                 (car (file-attributes
                        (concat (file-name-as-directory subdir) "bin")))))
              (directory-files proper-dir nil "^[^.]"))))
 
-(defun venv-get-stripped-path ()
-  "Return what the PATH environment variable would look like if
-we weren't in a virtualenv."
-  (s-join ":" (-filter (lambda (s) (not (s-contains? venv-dir s)))
-                       (s-split ":" (getenv "PATH")))))
+(defun venv-get-stripped-path (path)
+  "Return what a path would look like if we weren't in a
+virtualenv"
+  (let ((func (if (stringp venv-location)
+                  (lambda (s) (not (s-contains? venv-location s)))
+                (lambda (execs)
+                  (not (-filter (lambda (locs)
+                                  (s-contains?
+                                   (file-name-as-directory
+                                    (expand-file-name locs))
+                                   (file-name-as-directory
+                                    (expand-file-name execs))))
+                                venv-location))))))
+  (-filter func path)))
 
 (defun venv-is-valid (name)
-  "Test if a venv named NAME exists in the venv-dir"
+  "Test if a venv named NAME is a valid virtualenv specifier"
   (-contains? (venv-get-candidates) name))
 
 (defun venv-read-name (prompt)
@@ -129,9 +147,10 @@ we weren't in a virtualenv."
   "Deactivate the current venv."
   (interactive)
   (setq python-shell-virtualenv-path nil)
-  (setq exec-path (-filter (lambda (s) (not (s-contains? venv-dir s)))
-                           exec-path))
-  (setenv "PATH" (venv-get-stripped-path))
+  (setq exec-path (venv-get-stripped-path exec-path))
+  (setenv "PATH" (s-join ":"
+                  (venv-get-stripped-path
+                   (s-split ":" (getenv "PATH")))))
   (setenv "VIRTUAL_ENV" nil)
   (setq venv-current-name nil)
   (setq venv-current-dir nil)
@@ -141,21 +160,23 @@ we weren't in a virtualenv."
 (defun venv-workon (&optional name)
   "Interactively switch to a virtualenv."
   (interactive)
-  ;; first deactivate
-  (venv-deactivate)
   (if name
       ;; if called with argument, make sure it is valid
       (progn
         (when (not (venv-is-valid name))
           (error "Invalid virtualenv specified!"))
-        ;; then switch to it
+        ;; then deactivate
+        (venv-deactivate)
+        ;; then switch
         (setq venv-current-name name))
-    ;; if called without argument, prompt for completion
-  (setq venv-current-name
-          (venv-read-name "Virtualenv to switch to: ")))
+    (progn
+      ;; if without argument, deactivate first
+      (venv-deactivate)
+      ;; then read
+      (setq venv-current-name
+            (venv-read-name "Virtualenv to switch to: "))))
   (setq venv-current-dir
-        (file-name-as-directory
-         (concat (file-name-as-directory venv-dir) venv-current-name)))
+        (venv-name-to-dir venv-current-name))
   ;; push it onto the history
   (add-to-list 'venv-history venv-current-name)
   ;; setup the python shell
