@@ -126,8 +126,9 @@ haven't got around to to doing yet.
 
 ## Command Reference
 
-All of these comamnds can be called from eshell without prefixes or
-parens, exactly as you would in bash or zsh. For example:
+All commands here can be called interactively using `M-x` All of these
+comamnds can also be called from eshell without prefixes or parens,
+exactly as you would in bash or zsh. For example:
 
 ```
 eshell> workon myenv
@@ -260,7 +261,7 @@ order to have a virtualenv automatically activated when you open a
 python file in a particular project, you could put a `.dir-locals.el` in the
 project's root directory with something like:
 
-```
+```emacs
 ((python-mode . ((project-venv-name . "myproject-env"))))
 ```
 
@@ -300,8 +301,11 @@ just include `venv-current-name` in your `eshell-prompt-function`
 somewhere. Here is a simple example of a prompt that includes the
 current virtualenv name followed by a dollar sign:
 
-```emacs (setq eshell-prompt-function (lambda () (concat
-venv-current-name " $ "))) ```
+```emacs
+(setq eshell-prompt-function
+    (lambda ()
+      (concat venv-current-name " $ ")))
+```
 
 More about customizing the eshell prompt
 [on the EmacsWiki](http://www.emacswiki.org/emacs/EshellPrompt).
