@@ -1,16 +1,17 @@
 # venvwrapper.el
 
-An attempt to emulate the functionality of Doug Hellmann's
+A featureful virtualenv mode for Emacs. Emulates
+much of the functionality of Doug Hellmann's
 [virtualenvwrapper](https://bitbucket.org/dhellmann/virtualenvwrapper/)
-for Emacs
+for Emacs.
 
 ## Features
 
 * Works with the new
   [python.el](https://github.com/fgallina/python.el), which is the
-  built in on Emacs 24.3 and up. Does not support the old python
+  built in on Emacs 24.3 and up. Does not support the older python
   modes.
-* Python shells, system shells, eshell, and any other subprocesses can
+* Python shells, interactive shells, eshell, and any other subprocesses can
   be made aware of your virtualenvs.
 * Implements a large subset of the functionality of virtualenvwrapper.
 

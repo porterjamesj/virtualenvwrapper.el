@@ -299,7 +299,7 @@ and then evaluate FORMS."
            (venv-get-candidates))
      (message "Ran command in all virtualenvs.")))
 
-(defun venv-with-venv-shell-command (name command)
+(defun venv-with-virtualenv-shell-command (name command)
   "Execute the string COMMAND in virtualenv NAME."
   (venv-with-virtualenv name
                         (shell-command command)))
@@ -311,7 +311,7 @@ command (COMMAND) rather than elisp forms."
   (when (not command)
     (setq command (read-from-minibuffer "Shell command to execute: ")))
   (-map (lambda (name)
-          (venv-with-venv-shell-command name command))
+          (venv-with-virtualenv-shell-command name command))
         (venv-get-candidates))
   (message (concat "Executed " command " in all virtualenvs")))
 
@@ -343,7 +343,7 @@ command (COMMAND) rather than elisp forms."
                (setenv "VIRTUAL_ENV" venv-current-dir)))))
     (ad-activate 'shell))
 
-(defun venv-initialize-eshell
+(defun venv-initialize-eshell ()
   ;; make emacs and eshell share an environment
   (setq eshell-modify-global-environment t)
   ;; set eshell path
