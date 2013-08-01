@@ -1,4 +1,4 @@
-# venvwrapper.el
+# virtualenvwrapper.el
 
 A featureful virtualenv mode for Emacs. Emulates
 much of the functionality of Doug Hellmann's
