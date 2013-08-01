@@ -288,7 +288,8 @@ somewhere in your `mode-line-format`. If you don't customize your mode
 line and just want to have the current virtualenv displayed, you can
 do:
 
-```emacs (add-to-list 'mode-line-format '(:exec venv-current-name))
+```emacs
+(add-to-list 'mode-line-format '(:exec venv-current-name))
 ```
 
 ### Eshell prompt customization
