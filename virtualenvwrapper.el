@@ -83,9 +83,14 @@ to the directory where that virtualenv is located."
 get-candidates-string depending on which
 is appropriate for how venv-location is
 specified."
-  (if (stringp venv-location)
-      (venv-get-candidates-dir venv-location)
-    (venv-get-candidates-list venv-location)))
+  (let ((candidates
+         (if (stringp venv-location)
+             (venv-get-candidates-dir venv-location)
+           (venv-get-candidates-list venv-location))))
+    (when (not (eq (length (-distinct candidates))
+                   (length candidates)))
+      (error "Some virtualenvs have the same name!"))
+    candidates))
 
 (defun venv-get-candidates-list (list)
   "Given a list of virtualenv directories,
