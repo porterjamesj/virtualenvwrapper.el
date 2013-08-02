@@ -1,14 +1,15 @@
-;;; virtualenvwrapper.el -- a modern virtualenv tool for Emacs
+;;; virtualenvwrapper.el --- a modern virtualenv tool for Emacs
 
 ;; Copyright (C) 2013 James J Porter
-;;; Author: James J Porter <porterjamesj@gmail.com>
-;;; URL: http://github.com/porterjamesj/virtualenvwrapper.el
-;;; Version: 0.0.1
-;;; Keywords: python, virtualenv, virtualenvwrapper
 
 ;; Author: James J Porter <porterjamesj@gmail.com>
+;; URL: http://github.com/porterjamesj/virtualenvwrapper.el
+;; Version: 0.0.1
+;; Keywords: python, virtualenv, virtualenvwrapper
+;; Package-Requires: ((dash "1.5.0") (s "1.6.1"))
 
 ;;; Commentary:
+
 ;; A powerful virtualenv tool for Emacs.  See documentation at
 ;; https://github.com/porterjamesj/virtualenvwrapper.el
 
