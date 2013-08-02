@@ -9,7 +9,7 @@ for Emacs.
 
 * Works with the new
   [python.el](https://github.com/fgallina/python.el), which is the
-  built in on Emacs 24.3 and up. Does not support the older python
+  default on Emacs 24.3 and up. Does not support the older python
   modes.
 * Python shells, interactive shells, eshell, and any other subprocesses can
   be made aware of your virtualenvs.
@@ -17,15 +17,15 @@ for Emacs.
 
 ## Basic Usage
 
-* Make sure you have [dash.el](https://github.com/magnars/dash.el) and
-  [s.el](https://github.com/magnars/s.el) installed.
 * Obviously make sure you have
   [virtualenv](http://www.virtualenv.org/en/latest/) installed. You
-  don't actually need virtualenvwrapper.
-* Copy `virtualenvwrapper.el` to somewhere on your `load-path`
+  don't actually need virtualenvwrapper.sh, this is a reimplementation
+  in Emacs lisp.
+* Install from MELPA (`M-x package-install virtualenvwrapper`),
+  or just put `virtualenvwrapper.el` on your load path somewhere.
 * Put
 
-  ```emacs
+  ```lisp
   (require 'virtualenvwrapper)
   (venv-initialize-interactive-shells) ;; if you want interactive shell support
   (venv-initialize-eshell) ;; if you want eshell support
@@ -39,16 +39,13 @@ for Emacs.
 * If you have your virtualenvs spread around the filesystem rather
   than in one directory, just set venv-location to be a list of
   paths to each virtualenv. For example:
-  ```emacs
+  ```lisp
   (setq venv-location '("/path/to/project1-env/"
                         "/path/to/ptoject2-env/"))
   ```
   Notice that the final directory of each path has a different name.
   The mode uses this fact to disambiguate virtualenvs from each other,
-  so for now it is required. *WARNING* Seriously, don't try to use
-  virtualenvs with the same name. The tool has no way of telling them
-  apart, so horrible things may happen if you, e.g. try to delete one
-  and it deletes the other.
+  so for now it is required.
 
 ## What do activating and deactivating actually do?
 
@@ -68,9 +65,9 @@ will describe *exactly* what happens when you activate a virtualenv:
 3. The `VIRTUAL_ENV` environment variable is set to the virtualenv's
    directory so that any tools that depend on this variable function
    correctly (one such tool is
-   [jedi](http://tkf.github.io/emacs-jedi/))
+   [jedi](http://tkf.github.io/emacs-jedi/)).
 4. The virtualenv's `bin` directory added to the `exec-path`, so that
-   Emacs itself can find the environment's installed variables. This is
+   Emacs itself can find the environment's installed executables. This is
    useful, for example, if you want to have Emacs spawn a subprocess
    running an executable installed in a virtualenv.
 
@@ -94,9 +91,9 @@ and the
 Support for interactive shell is turned on by calling
 `venv-initialize-interactive-shell`. After this is done, whenever you
 call `shell`, the shell will start in the correct virtualenv. This
-detects whether or not you have virtualenv wrapper installed and does
+detects whether or not you have virtualenvwrapper.sh installed and does
 the right thing in either case.  Note that changing the virtualenv in
-Emacs will not affect any running shells and vice-versa, they are
+Emacs will not affect any running shells and vice-versa; they are
 independant processes.
 
 #### WARNINGS
@@ -119,16 +116,18 @@ below). Note that in contrast to how interactive shells work, Eshell
 shares an environment with Emacs, so if you activate or deactivate in
 one, the other is affected as well. Note that this requires the
 variable `eshell-modify-global-environment` to be set to true. Running
-`venv-initialize-shell` causes this to occur. If this doesn't work for
+`venv-initialize-eshell` causes this to occur. If this doesn't work for
 you, open an issue! It's technically possible to separate the two, but
-it requires some hacking around with the different namespaces that I'm
-haven't got around to to doing yet.
+it requires some hacking around with the different namespaces that I
+won't bother to do unless someone really needs it.
 
 ## Command Reference
 
-All commands here can be called interactively using `M-x` All of these
-comamnds can also be called from eshell without prefixes or parens,
-exactly as you would in bash or zsh. For example:
+The commands this mode provides are prefixed with `venv-`
+All commands can be called interactively using `M-x`. All of these
+comamnds have also been aliased without prefixes as eshell functions,
+so you can call them on the eshell just as you would in bash or zsh.
+For example:
 
 ```
 eshell> workon myenv
@@ -136,6 +135,8 @@ eshell> deactivate
 eshell> cpvirtualenv env copy
 eshell> mkvirtualenv newenv
 ```
+
+All will do what would expect.
 
 #### `venv-workon`
 
@@ -152,7 +153,7 @@ did. This can also be called noninteractively as `(venv-deactivate)`.
 Prompt for a name and create a new virtualenv. If your virtualenvs are
 all kept in the same directory (i.e. `venv-location` is a string),
 then the new virtualenv will be created in that directory. If you keep
-for virtualenvs in a variety of places (i.e. `venv-location` is a
+your virtualenvs in different places (i.e. `venv-location` is a
 list), then the new virtualenv will be created in the current default
 directory. Also callable noninteracively as `(venv-mkvirtualenv
 "name")`.
@@ -164,7 +165,7 @@ noninteracively as `(venv-rmvirtualenv "name")`.
 
 #### `venv-lsvirtualenv`
 
-Display all virtualenvs in a help buffer. If you want to get use this
+Display all available virtualenvs in a help buffer. If you want to get use this
 noninteractively, use `(venv-list-virtualenvs)`.
 
 #### `venv-cdvirtualenv`
@@ -182,7 +183,7 @@ the names of both. *WARNING* This comes with same caveat as the
 corresponding command in the original virtualenvwrapper, which is that
 some packages hardcode their locations when being installed, so
 creating new virtualenvs in this manner may cause them to break. Use
-with caution
+with caution.
 
 
 ## Useful Macros
@@ -191,13 +192,13 @@ There is a `venv-with-virtualenv` macro, which takes the name of a
 virtualenv and then any number of forms and executes those forms with
 that virtualenv active, in that virtualenv's directory.  For example:
 
-```emacs
+```lisp
 (venv-with-virtualenv "myenv" (message default-directory))
 ```
 
 Will message the path of `myenv`'s directory. There's also a
 `venv-all-virtualenv` macro, which takes a series of forms, activates
-each virtualenv env in turn, moves to its directory, and executes the
+each virtualenv in turn, moves to its directory, and executes the
 given forms.
 
 Since its common to want to execute shell commands, there are
@@ -212,7 +213,7 @@ if so.
 The eshell supports using this command just like in bash or zsh, so at
 an eshell prompt, you can just do:
 
-```emacs
+```
 eshell> allvirtualenv pip install pep8
 ```
 
@@ -226,7 +227,7 @@ yourself, such as your mode line, keybindings, mode-hooks, etc. in
 order to provide stuff like automatically turning on virtualenvs in
 certain projects, show the virtualenv on the mode line, etc. Instead,
 you can do all these things pretty easily using tools already provided
-by Emacs. How to do soem of them are described below.
+by Emacs. How to do some of them are described below.
 
 ### Keybindings
 
@@ -239,10 +240,10 @@ Virtualenvwrapper lets you write shell scripts that run as hooks after you
 take certain actions, such as creating or deleting a virtualenv. This mode
 doesn't provide something similar, because emacs itself already does in the
 form of
-[advice](https://www.gnu.org/software/emacs/manual/html_node/elisp/Advising-Functions.html). For example, you could advice the mkvirtualenv function to install
+[advice](https://www.gnu.org/software/emacs/manual/html_node/elisp/Advising-Functions.html). For example, you could advise the mkvirtualenv function to install
 commonly used tools when a new virtualenv is created:
 
-```emacs
+```lisp
 (defadvice venv-mkvirtualenv (after install-common-tools)
     "Install commonly used packages in new virtualenvs."
     (shell-command "pip install flake8 nose jedi"))
@@ -254,22 +255,23 @@ Its also common to want to have a virtualenv automatically activated
 when you open a file in a certain project. This mode provides no
 special way to do this because once again Emacs has already done it in
 the form of
-[Per-Directory Local Variables](https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html)
+[per-directory local variables](https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html)
 and
 [mode hooks](https://www.gnu.org/software/emacs/manual/html_node/emacs/Hooks.html). In
 order to have a virtualenv automatically activated when you open a
 python file in a particular project, you could put a `.dir-locals.el` in the
 project's root directory with something like:
 
-```emacs
+```lisp
 ((python-mode . ((project-venv-name . "myproject-env"))))
 ```
 
-Now whenever python mode is activated, you will have a variable
-`project-venv-name`. In order to cause this venv to be activated, we can just add
-a python-mode hook:
+Now whenever you open one of this project's python files, you will
+have a variable `project-venv-name` set to the name of the project's
+virtualenv. In order to cause this venv to be activated
+automatically, we can just add a python-mode hook:
 
-```emacs
+```lisp
 (add-hook 'python-mode-hook (lambda ()
                               (hack-local-variables)
                               (venv-workon project-venv-name)))
@@ -282,15 +284,15 @@ them.
 
 ### Displaying the currently active virtualenv on the mode line
 
-The name of the currently active virtualenv is in the variable
+The name of the currently active virtualenv is stored in the variable
 `venv-current-name`. If you want to have it displayed on your custom
 mode line you can just add `(:exec (list venv-current-name)))`
 somewhere in your `mode-line-format`. If you don't customize your mode
 line and just want to have the current virtualenv displayed, you can
 do:
 
-```emacs
-(add-to-list 'mode-line-format '(:exec venv-current-name))
+```lisp
+(setq-default mode-line-format (cons '(:exec venv-current-name) mode-line-format))
 ```
 
 ### Eshell prompt customization
@@ -301,18 +303,21 @@ just include `venv-current-name` in your `eshell-prompt-function`
 somewhere. Here is a simple example of a prompt that includes the
 current virtualenv name followed by a dollar sign:
 
-```emacs
+```lisp
 (setq eshell-prompt-function
     (lambda ()
       (concat venv-current-name " $ ")))
 ```
+
+Make sure you also adjust your `eshell-prompt-regexp` if you do this.
 
 More about customizing the eshell prompt
 [on the EmacsWiki](http://www.emacswiki.org/emacs/EshellPrompt).
 
 ### Bugs / Comments / Contributions
 
-Open an issue or a PR!
+Open an issue or a PR! I'm happy to pull in contributions or take
+suggestions for improvements.
 
 ### License
 

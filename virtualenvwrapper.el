@@ -4,22 +4,19 @@
 ;; Author: James J Porter <porterjamesj@gmail.com>
 
 ;;; Commentary:
-;; I really like the new python.el, but virtualenv.el
-;; is built for old python.el and python-mode.el.  I don't
-;; care about the code supporting those; virtualenv.el
-;; also doesn't work correctly with M-x shell and eshell.
-;; This is my attempt to make a mode that supports only the
-;; new python.el and gives a smooth workflow with the python
-;; shell, M-x shell, and M-x eshell, as well as running shell
-;; commands with M-! or what have you.
+;; A powerful virtualenv tool for Emacs.  See documentation at
+;; https://github.com/porterjamesj/virtualenvwrapper.el
 
-;;; TODO:
-;; I would also like to make the way this handles M-x shell a bit less
-;; hacky. It's currently not POSIX compliant, just feels like the
-;; wrong thing to do, and looks weird when you open a shell to
-;; boot. The only alternative I can see, however, would be to
-;; basically reimplement everything vitrualenvwrapper > workon does in
-;; elisp, which seems like a waste of time.
+;;; POTENTIAL TODOS:
+;; - Figure out a better way to make M-x shell work than
+;;   advising it.  This could be done if Emacs had pre-
+;;   and post- shell activation hooks.
+;; - Implement the option to have eshell work in a separate
+;;   namespace.  This would be a substantial refactor.
+;; - Add an option for `venv-location' to be an alist.
+;; - Add autocompletion of virtualenvs at the eshell prompt.
+;; - Add ability to create and destroy multiple virtualenvs
+;;   at once.
 
 
 ;;; Code:
@@ -93,7 +90,7 @@ specified."
     candidates))
 
 (defun venv-get-candidates-list (list)
-  "Given a list of virtualenv directories,
+  "Given LIST of virtualenv directories,
 return a list of names that can be used in, e.g.
 a completing read. This trusts the caller to only
 pass directories with are actually virtualenvs."
@@ -107,7 +104,7 @@ pass directories with are actually virtualenvs."
                   list)))
 
 (defun venv-get-candidates-dir (dir)
-  "Given a directory containing virtualenvs, return a list
+  "Given a directory DIR containing virtualenvs, return a list
 of names that can be used in the completing read."
   (let ((proper-dir (file-name-as-directory (expand-file-name dir))))
     (-filter (lambda (s)
@@ -117,8 +114,8 @@ of names that can be used in the completing read."
              (directory-files proper-dir nil "^[^.]"))))
 
 (defun venv-get-stripped-path (path)
-  "Return what a path would look like if we weren't in a
-virtualenv"
+  "Return what the PATH would look like if we weren't in a
+virtualenv. PATH should be a list of strings specifiying directories."
   (let ((func (if (stringp venv-location)
                   (lambda (s) (not (s-contains? venv-location s)))
                 (lambda (execs)
@@ -132,11 +129,12 @@ virtualenv"
   (-filter func path)))
 
 (defun venv-is-valid (name)
-  "Test if a venv named NAME is a valid virtualenv specifier"
+  "Test if NAME is a valid virtualenv specifier"
   (-contains? (venv-get-candidates) name))
 
 (defun venv-read-name (prompt)
-  "Do a completing read to get the name of a candidate."
+  "Do a completing read to get the name of a candidate,
+prompting the user with the string PROMPT"
   (let ((candidates (venv-get-candidates)))
     (completing-read prompt
                      candidates nil t nil
@@ -165,7 +163,8 @@ virtualenv"
   (message "virtualenv deactivated"))
 
 (defun venv-workon (&optional name)
-  "Interactively switch to a virtualenv."
+  "Interactively switch to virtualenv NAME. Prompts for name if called
+interactively."
   (interactive)
   (if name
       ;; if called with argument, make sure it is valid
@@ -196,6 +195,10 @@ virtualenv"
   (message (concat "Switched to virtualenv: " venv-current-name)))
 
 (defun venv-mkvirtualenv (&optional name)
+"Create new virtualenv NAME. If venv-location is a single
+directory, the new virtualenv is made there; if it is a list of
+directories, the new virtualenv is made in the current
+default-directory."
   (interactive)
   (let ((parent-dir (if (stringp venv-location)
                         (file-name-as-directory
@@ -214,6 +217,7 @@ virtualenv"
     (message (concat "Created virtualenv: " name))))
 
 (defun venv-rmvirtualenv (&optional name)
+"Delete virtualenv NAME."
   (interactive)
   ;; deactivate first
   (venv-deactivate)
@@ -255,14 +259,15 @@ we are immediately in that directory."
     (error "No virtualenv is currently active.")))
 
 (defun venv-cpvirtualenv (&optional name newname)
-  "Copy virtualenv NAME to NEWNAME. This comes with the
-same caveat as cpvirtualenv in the original virtualenvwrapper,
-which is that is far from guarenteed to work well. Many packages
-hardcode absolute paths in various places an will break if moved to
-a new location. Use with caution. If used with a single virtualenv
-directory, behaves just like cpvirtualenv in virtualenvwrapper.sh.
-If used with virtualenvs spread around the filesystem, creates the
-new virtualenv in the current default directory."
+  "Copy virtualenv NAME to NEWNAME. Any arguments not passed will be
+prompprted for This comes with the same caveat as cpvirtualenv in the
+original virtualenvwrapper, which is that is far from guarenteed to
+work well. Many packages hardcode absolute paths in various places an
+will break if moved to a new location. Use with caution. If used with
+a single virtualenv directory, behaves just like cpvirtualenv in
+virtualenvwrapper.sh.  If used with virtualenvs spread around the
+filesystem, creates the new virtualenv in the current default
+directory."
   (interactive)
   (let ((parent-dir (if (stringp venv-location)
                         (file-name-as-directory
@@ -324,7 +329,7 @@ command (COMMAND) rather than elisp forms."
 ;; Code for setting up shell and eshell
 
 (defun venv-shell-init (process)
-  "Startup the current virtualenv in a newly opened shell."
+  "Activate the current virtualenv in a newly opened shell."
   (comint-send-string
    process
    (concat "if command -v workon >/dev/null 2>&1; then workon "
@@ -334,6 +339,8 @@ command (COMMAND) rather than elisp forms."
            "bin/activate; fi \n")))
 
 (defun venv-initialize-interactive-shells ()
+  "Configure interactive shells for use with
+virtualenvwrapper.el."
     (defadvice shell (around strip-env ())
       "Use the environment without the venv to start up a new shell."
       (let* ((buffer-name (or buffer "*shell*"))
@@ -349,6 +356,7 @@ command (COMMAND) rather than elisp forms."
     (ad-activate 'shell))
 
 (defun venv-initialize-eshell ()
+  "Configure eshell for use with virtualenvwrapper.el."
   ;; make emacs and eshell share an environment
   (setq eshell-modify-global-environment t)
   ;; set eshell path
