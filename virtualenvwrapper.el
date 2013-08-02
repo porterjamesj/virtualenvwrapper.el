@@ -347,7 +347,8 @@ virtualenvwrapper.el."
              (buffer-exists-already (get-buffer buffer-name)))
         (if (or buffer-exists-already (not venv-current-name))
             ad-do-it
-          (progn (setenv "PATH" (venv-get-stripped-path))
+          (progn (setenv "PATH" (s-join ":" (venv-get-stripped-path
+                                         (s-split ":" (getenv "PATH")))))
                  (setenv "VIRTUAL_ENV" nil)
                  ad-do-it
                  (venv-shell-init buffer-name)
