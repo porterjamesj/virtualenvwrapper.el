@@ -278,15 +278,19 @@ directory."
   (let ((parent-dir (if (stringp venv-location)
                         (file-name-as-directory
                          (expand-file-name venv-location))
-                      (default-directory))))
+                      default-directory)))
     (when (not name) (setq name (venv-read-name "Virtualenv to copy from: ")))
     (when (not newname) (setq newname
                               (read-from-minibuffer "Virtualenv to copy to: ")))
     ;; throw an error if newname already exists
     (when (file-exists-p (concat parent-dir newname))
       (error "A virtualenv with the proposed name already exists!"))
+    ;; make the copy
     (copy-directory (venv-name-to-dir name)
                     (concat parent-dir newname))
+    ;; if the location specifier is a list, add to it.
+    (when (listp venv-location)
+      (add-to-list 'venv-location (concat parent-dir newname)))
     (venv-workon newname)))
 
 
