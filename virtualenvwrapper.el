@@ -350,10 +350,7 @@ command (COMMAND) rather than elisp forms."
   (setq eshell-path-env (getenv "PATH"))
   ;; alias functions
   (defun eshell/workon (arg) (venv-workon arg))
-  (defun eshell/deactivate ()
-    (setenv "PATH" (venv-get-stripped-path))
-    (setenv "VIRTUAL_ENV" nil)
-    (message "virtualenv deactivated"))
+  (defun eshell/deactivate () (venv-deactivate))
   (defun eshell/rmvirtualenv (arg) (venv-rmvirtualenv arg))
   (defun eshell/mkvirtualenv (arg) (venv-mkvirtualenv arg))
   (defun eshell/cpvirtualenv (arg) (venv-cpvirtualenv arg))
