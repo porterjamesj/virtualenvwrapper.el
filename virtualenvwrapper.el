@@ -154,6 +154,7 @@ prompting the user with the string PROMPT"
 
 ;; potentially interactive user-exposed functions
 
+;;;###autoload
 (defun venv-deactivate ()
   "Deactivate the current venv."
   (interactive)
@@ -168,6 +169,7 @@ prompting the user with the string PROMPT"
   (setq eshell-path-env (getenv "PATH"))
   (message "virtualenv deactivated"))
 
+;;;###autoload
 (defun venv-workon (&optional name)
   "Interactively switch to virtualenv NAME. Prompts for name if called
 interactively."
@@ -200,6 +202,7 @@ interactively."
   (setenv "VIRTUAL_ENV" venv-current-dir)
   (message (concat "Switched to virtualenv: " venv-current-name)))
 
+;;;###autoload
 (defun venv-mkvirtualenv (&optional name)
 "Create new virtualenv NAME. If venv-location is a single
 directory, the new virtualenv is made there; if it is a list of
@@ -222,6 +225,7 @@ default-directory."
     (venv-workon name)
     (message (concat "Created virtualenv: " name))))
 
+;;;###autoload
 (defun venv-rmvirtualenv (&optional name)
 "Delete virtualenv NAME."
   (interactive)
@@ -244,6 +248,7 @@ default-directory."
                    venv-location)))
   (message (concat "Deleted virtualenv: " name)))
 
+;;;###autoload
 (defun venv-lsvirtualenv ()
   "List all available virtualenvs in a temp buffer."
   (interactive)
@@ -251,6 +256,7 @@ default-directory."
       "*Virtualenvs*"
       (princ (venv-list-virtualenvs))))
 
+;;;###autoload
 (defun venv-cdvirtualenv (&optional subdir)
   "Change to the directory of current virtualenv. If
 SUBDIR is passed, append that to the path such that
@@ -264,6 +270,7 @@ we are immediately in that directory."
         (message (concat "Now in directory: " going-to)))
     (error "No virtualenv is currently active.")))
 
+;;;###autoload
 (defun venv-cpvirtualenv (&optional name newname)
   "Copy virtualenv NAME to NEWNAME. Any arguments not passed will be
 prompprted for This comes with the same caveat as cpvirtualenv in the
@@ -386,4 +393,4 @@ virtualenvwrapper.el."
 
 
 (provide 'virtualenvwrapper)
-;;; venvwrapper.el ends here
+;;; virtualenvwrapper.el ends here
