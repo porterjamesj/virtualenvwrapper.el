@@ -200,6 +200,8 @@ interactively."
   (add-to-list 'exec-path (concat venv-current-dir "bin"))
   ;; setup the environment for subprocesses
   (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
+  ;; keep eshell path in sync
+  (setq eshell-path-env (getenv "PATH"))
   (setenv "VIRTUAL_ENV" venv-current-dir)
   (message (concat "Switched to virtualenv: " venv-current-name)))
 
