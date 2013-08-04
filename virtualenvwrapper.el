@@ -387,7 +387,8 @@ virtualenvwrapper.el."
   (defun eshell/lsvirtualenv () (venv-list-virtualenvs))
   (defun eshell/allvirtualenv (&rest command)
     (venv-allvirtualenv-shell-command
-     (s-join " " (eshell-stringify-list command)))))
+     (s-join " " (eshell-stringify-list command))))
+  (message "Eshell virtualenv support initialized."))
 
 
 (provide 'virtualenvwrapper)
