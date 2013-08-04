@@ -123,7 +123,10 @@ of names that can be used in the completing read."
   "Return what the PATH would look like if we weren't in a
 virtualenv. PATH should be a list of strings specifiying directories."
   (let ((func (if (stringp venv-location)
-                  (lambda (s) (not (s-contains? venv-location s)))
+                  (lambda (s) (not (s-contains?
+                                    (file-name-as-directory
+                                     (expand-file-name
+                                      venv-location)) s)))
                 (lambda (execs)
                   (not (-filter (lambda (locs)
                                   (s-contains?
