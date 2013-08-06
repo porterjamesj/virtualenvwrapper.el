@@ -4,7 +4,7 @@
 
 ;; Author: James J Porter <porterjamesj@gmail.com>
 ;; URL: http://github.com/porterjamesj/virtualenvwrapper.el
-;; Version: 0.0.1
+;; Version: 20130805
 ;; Keywords: python, virtualenv, virtualenvwrapper
 ;; Package-Requires: ((dash "1.5.0") (s "1.6.1"))
 
@@ -26,6 +26,9 @@
 
 
 ;;; Code:
+
+(require 'dash)
+(require 's)
 
 ;; customizable variables
 
