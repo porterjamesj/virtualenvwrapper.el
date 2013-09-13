@@ -129,7 +129,7 @@ virtualenv. PATH should be a list of strings specifiying directories."
                   (lambda (s) (not (s-contains?
                                     (file-name-as-directory
                                      (expand-file-name
-                                      venv-location)) s)))
+                                      venv-location)) (or s default-directory))))
                 (lambda (execs)
                   (not (-filter (lambda (locs)
                                   (s-contains?
