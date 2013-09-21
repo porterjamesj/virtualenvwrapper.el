@@ -181,7 +181,8 @@ prompting the user with the string PROMPT"
   (setq venv-current-name nil)
   (setq venv-current-dir nil)
   (setq eshell-path-env (getenv "PATH"))
-  (message "virtualenv deactivated"))
+  (when (called-interactively-p 'interactive)
+    (message "virtualenv deactivated")))
 
 ;;;###autoload
 (defun venv-workon (&optional name)
@@ -216,7 +217,8 @@ interactively."
   ;; keep eshell path in sync
   (setq eshell-path-env (getenv "PATH"))
   (setenv "VIRTUAL_ENV" venv-current-dir)
-  (message (concat "Switched to virtualenv: " venv-current-name)))
+  (when (called-interactively-p 'interactive)
+    (message (concat "Switched to virtualenv: " venv-current-name))))
 
 ;;;###autoload
 (defun venv-mkvirtualenv (&rest names)
@@ -268,6 +270,9 @@ default-directory."
             (setq venv-location
                   (-filter (lambda (locs) (not (s-equals?
                                                 it
+                                                (venv-dir-to-name locs))))
+                           venv-location)))
+          (message (concat "Deleted virtualenv: " it))))
 
 ;;;###autoload
 (defun venv-lsvirtualenv ()
@@ -288,7 +293,8 @@ we are immediately in that directory."
                                (expand-file-name venv-current-dir))
                               subdir)))
         (cd going-to)
-        (message (concat "Now in directory: " going-to)))
+        (when (called-interactively-p 'interactive)
+          (message (concat "Now in directory: " going-to))))
     (error "No virtualenv is currently active.")))
 
 ;;;###autoload
@@ -319,6 +325,8 @@ directory."
     ;; if the location specifier is a list, add to it.
     (when (listp venv-location)
       (add-to-list 'venv-location (concat parent-dir newname)))
+    (when (called-interactively-p 'interactive)
+      (message (format "Copied virtualenv %s to %s" name newname)))
     (venv-workon newname)))
 
 
@@ -337,8 +345,7 @@ identifying a virtualenv."
        (if prev-env ;; switch back
            (venv-workon prev-env)
            (venv-deactivate))
-       (cd prev-dir)
-       (message (concat "Evaluated in venv: " ,name)))))
+       (cd prev-dir))))
 
 (defmacro venv-allvirtualenv (&rest forms)
   "For each virtualenv, activate it, switch to its directory,
