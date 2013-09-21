@@ -41,7 +41,9 @@
   "The location(s) of your virtualenvs. This
 can be either a string, which indicates a single directory in which
 you keep all your virutalenvs, or a list of strings, in which case it
-specifies disparate locations in which all your virtualenvs are kept."
+specifies disparate locations in which all your virtualenvs are kept.
+The default location is ~/.virtualenvs/, which is where your virtualenvs
+are stored if you use virtualenvwrapper in the shell."
   :group 'virtualenvwrapper)
 
 
