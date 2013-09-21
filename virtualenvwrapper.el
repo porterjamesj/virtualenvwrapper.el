@@ -382,7 +382,9 @@ command (COMMAND) rather than elisp forms."
   (message (concat "Executed " command " in all virtualenvs")))
 
 
-;; Code for setting up shell and eshell
+;; Code for setting up interactive shell and eshell
+
+;; interactive shell
 
 (defun venv-shell-init (process)
   "Activate the current virtualenv in a newly opened shell."
@@ -412,6 +414,16 @@ virtualenvwrapper.el."
                (setenv "VIRTUAL_ENV" venv-current-dir)))))
     (ad-activate 'shell))
 
+
+;; eshell
+
+(defun venv--gen-fun (command)
+  `(defun ,(intern (format "pcomplete/eshell-mode/%s" command)) ()
+     (pcomplete-here* (venv-get-candidates))))
+
+(defmacro venv--make-pcompletions (commands)
+  `(progn ,@(-map #'venv--gen-fun commands)))
+
 (defun venv-initialize-eshell ()
   "Configure eshell for use with virtualenvwrapper.el."
   ;; make emacs and eshell share an environment
@@ -429,6 +441,9 @@ virtualenvwrapper.el."
   (defun eshell/allvirtualenv (&rest command)
     (venv-allvirtualenv-shell-command
      (s-join " " (eshell-stringify-list command))))
+  ;; make completions work
+  (venv--make-pcompletions ("workon" "rmvirtualenv"
+                            "cdvirtualenv" "cpvirtualenv"))
   (message "Eshell virtualenv support initialized."))
 
 
