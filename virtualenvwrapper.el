@@ -316,11 +316,14 @@ directory."
   "Evaluate FORMS with venv NAME active. NAME must be a string
 identifying a virtualenv."
   `(progn
-     (let ((prev-dir default-directory))
-       (venv-workon ,name)
+     (let ((prev-dir default-directory)
+           (prev-env venv-current-name))
+       (venv-workon ,name) ;; switch it up
        (cd venv-current-dir)
-       ,@forms
-       (venv-deactivate)
+       ,@forms ;; evalulate forms
+       (if prev-env ;; switch back
+           (venv-workon prev-env)
+           (venv-deactivate))
        (cd prev-dir)
        (message (concat "Evaluated in venv: " ,name)))))
 
