@@ -140,6 +140,12 @@ virtualenv. PATH should be a list of strings specifiying directories."
                                 venv-location))))))
   (-filter func path)))
 
+
+(defun venv--purge-history (candidates)
+  "Remove history candidates that are not present in the list CANDIDATES"
+  (setq venv-history (-filter (lambda (s) (not (-contains? candidates s)))
+                              venv-history)))
+
 (defun venv-is-valid (name)
   "Test if NAME is a valid virtualenv specifier"
   (-contains? (venv-get-candidates) name))
@@ -148,6 +154,8 @@ virtualenv. PATH should be a list of strings specifiying directories."
   "Do a completing read to get the name of a candidate,
 prompting the user with the string PROMPT"
   (let ((candidates (venv-get-candidates)))
+    ;; purge history of no longer existant candidates first
+    (venv--purge-history candidates)
     (completing-read prompt
                      candidates nil t nil
                      'venv-history
