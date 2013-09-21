@@ -61,7 +61,7 @@ specifies disparate locations in which all your virtualenvs are kept."
 
 (defun venv-dir-to-name (dir)
   "Extract the name of a virtualenv from a path."
-  (car (last (-filter (lambda (s) (not (s-blank? s)))
+  (car (last (--filter (not (s-blank? it))
                  (s-split "/" dir)))))
 
 (defun venv-name-to-dir (name)
@@ -351,11 +351,9 @@ identifying a virtualenv."
   "For each virtualenv, activate it, switch to its directory,
 and then evaluate FORMS."
   `(progn
-     (-map (lambda (name)
-             (venv-with-virtualenv name
-                                   ,@forms))
-           (venv-get-candidates))
-     (message "Ran command in all virtualenvs.")))
+     (--each (venv-get-candidates)
+             (venv-with-virtualenv it
+                                   ,@forms))))
 
 (defun venv-with-virtualenv-shell-command (name command)
   "Execute the string COMMAND in virtualenv NAME."
