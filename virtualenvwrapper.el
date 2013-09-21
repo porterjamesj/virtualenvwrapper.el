@@ -219,50 +219,55 @@ interactively."
   (message (concat "Switched to virtualenv: " venv-current-name)))
 
 ;;;###autoload
-(defun venv-mkvirtualenv (&optional name)
-"Create new virtualenv NAME. If venv-location is a single
-directory, the new virtualenv is made there; if it is a list of
-directories, the new virtualenv is made in the current
+(defun venv-mkvirtualenv (&rest names)
+"Create new virtualenvs NAMES. If venv-location is a single
+directory, the new virtualenvs are made there; if it is a list of
+directories, the new virtualenvs are made in the current
 default-directory."
   (interactive)
   (let ((parent-dir (if (stringp venv-location)
                         (file-name-as-directory
                          (expand-file-name venv-location))
                       default-directory)))
-    (when (not name)
-      (setq name (read-from-minibuffer "New virtualenv: ")))
-    ;; error if this env already exists
-    (when (-contains? (venv-get-candidates) name)
-      (error "A virtualenv with this name already exists!"))
-    ;; should this be asynchronous?
-    (shell-command (concat "virtualenv " parent-dir name))
-    (when (listp venv-location)
-        (add-to-list 'venv-location (concat parent-dir name)))
-    (venv-workon name)
-    (message (concat "Created virtualenv: " name))))
+    (when (not names)
+      (setq names (list (read-from-minibuffer "New virtualenv: "))))
+    ;; map over all the envs we want to make
+    (--each names
+            ;; error if this env already exists
+            (when (-contains? (venv-get-candidates) it)
+              (error "A virtualenv with this name already exists!"))
+            ;; should this be asynchronous?
+            (shell-command (concat "virtualenv " parent-dir it))
+            (when (listp venv-location)
+              (add-to-list 'venv-location (concat parent-dir it)))
+            (when (called-interactively-p 'interactive)
+              (message (concat "Created virtualenv: " it)))))
+    ;; workon the last venv we made
+    (venv-workon (car (last names))))
 
 ;;;###autoload
-(defun venv-rmvirtualenv (&optional name)
-"Delete virtualenv NAME."
+(defun venv-rmvirtualenv (&rest names)
+"Delete virtualenvs NAMES."
   (interactive)
   ;; deactivate first
   (venv-deactivate)
-  (if name
-      (when (not (venv-is-valid name))
-        (error "Invalid virtualenv specified!"))
-    (setq name (venv-read-name "Virtualenv to delete: ")))
-  (delete-directory (venv-name-to-dir name) t)
-  ;; get it out of the history so it doesn't show up in completing reads
-  (setq venv-history (-filter
-                      (lambda (s) (not (s-equals? s name))) venv-history))
-  ;; if location is a list, delete it from the list
-  (when (listp venv-location)
-    (setq venv-location
-          (-filter (lambda (locs) (not (s-equals?
-                                        name
-                                        (venv-dir-to-name locs))))
-                   venv-location)))
-  (message (concat "Deleted virtualenv: " name)))
+  ;; check validity and read names if necessary
+  (if names
+      (--map (when (not (venv-is-valid it))
+               (error "Invalid virtualenv specified!"))
+             names)
+    (setq names (list (venv-read-name "Virtualenv to delete: "))))
+  ;; map over names, deleting the appropriate directory
+  (--each names
+          (delete-directory (venv-name-to-dir it) t)
+          ;; get it out of the history so it doesn't show up in completing reads
+          (setq venv-history (-filter
+                              (lambda (s) (not (s-equals? s it))) venv-history))
+          ;; if location is a list, delete it from the list
+          (when (listp venv-location)
+            (setq venv-location
+                  (-filter (lambda (locs) (not (s-equals?
+                                                it
 
 ;;;###autoload
 (defun venv-lsvirtualenv ()
@@ -401,9 +406,9 @@ virtualenvwrapper.el."
   ;; alias functions
   (defun eshell/workon (arg) (venv-workon arg))
   (defun eshell/deactivate () (venv-deactivate))
-  (defun eshell/rmvirtualenv (arg) (venv-rmvirtualenv arg))
-  (defun eshell/mkvirtualenv (arg) (venv-mkvirtualenv arg))
-  (defun eshell/cpvirtualenv (arg) (venv-cpvirtualenv arg))
+  (defun eshell/rmvirtualenv (&rest args) (apply #'venv-rmvirtualenv args))
+  (defun eshell/mkvirtualenv (&rest args) (apply #'venv-mkvirtualenv args))
+  (defun eshell/cpvirtualenv (&rest argas) (apply #'venv-cpvirtualenv args))
   (defun eshell/cdvirtualenv (&optional arg) (venv-cdvirtualenv arg))
   (defun eshell/lsvirtualenv () (venv-list-virtualenvs))
   (defun eshell/allvirtualenv (&rest command)
