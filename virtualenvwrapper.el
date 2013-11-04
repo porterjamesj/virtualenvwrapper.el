@@ -386,6 +386,7 @@ command (COMMAND) rather than elisp forms."
 
 ;; interactive shell
 
+;;;###autoload
 (defun venv-shell-init (process)
   "Activate the current virtualenv in a newly opened shell."
   (comint-send-string
@@ -396,6 +397,7 @@ command (COMMAND) rather than elisp forms."
            venv-current-dir
            "bin/activate; fi \n")))
 
+;;;###autoload
 (defun venv-initialize-interactive-shells ()
   "Configure interactive shells for use with
 virtualenvwrapper.el."
