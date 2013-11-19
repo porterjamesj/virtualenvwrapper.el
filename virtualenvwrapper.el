@@ -63,6 +63,11 @@ are stored if you use virtualenvwrapper in the shell."
 
 (defvar venv-current-dir nil "Directory of current virtualenv.")
 
+;; copy from virtualenv.el
+(defvar venv-executables-dir 
+  (if (eq system-type 'windows-nt) "/Scripts" "/bin")
+  "The name of the directory containing executables. It is system
+dependent.")
 
 ;; internal utility functions
 
@@ -89,7 +94,7 @@ to the directory where that virtualenv is located."
      (if (and potential-dir
               (file-exists-p
                (concat (file-name-as-directory
-                        (expand-file-name potential-dir)) "bin")))
+                        (expand-file-name potential-dir)) venv-executables-dir)))
          (file-name-as-directory
           (expand-file-name potential-dir))
        (error (concat "No such virtualenv: " name))))))
@@ -119,7 +124,7 @@ pass directories with are actually virtualenvs."
          (-filter
           (lambda (s) (car (file-attributes
                             (concat (file-name-as-directory
-                                     (expand-file-name s)) "bin"))))
+                                     (expand-file-name s)) venv-executables-dir))))
                   list)))
 
 (defun venv-get-candidates-dir (dir)
@@ -129,7 +134,7 @@ of names that can be used in the completing read."
     (-filter (lambda (s)
                (let ((subdir (concat proper-dir s)))
                  (car (file-attributes
-                       (concat (file-name-as-directory subdir) "bin")))))
+                       (concat (file-name-as-directory subdir) venv-executables-dir)))))
              (directory-files proper-dir nil "^[^.]"))))
 
 (defun venv-get-stripped-path (path)
@@ -184,9 +189,9 @@ prompting the user with the string PROMPT"
   (interactive)
   (setq python-shell-virtualenv-path nil)
   (setq exec-path (venv-get-stripped-path exec-path))
-  (setenv "PATH" (s-join ":"
+  (setenv "PATH" (s-join path-separator
                   (venv-get-stripped-path
-                   (s-split ":" (getenv "PATH")))))
+                   (s-split path-separator (getenv "PATH")))))
   (setenv "VIRTUAL_ENV" nil)
   (setq venv-current-name nil)
   (setq venv-current-dir nil)
@@ -221,9 +226,9 @@ interactively."
   ;; setup the python shell
   (setq python-shell-virtualenv-path venv-current-dir)
   ;; setup emacs exec-path
-  (add-to-list 'exec-path (concat venv-current-dir "bin"))
+  (add-to-list 'exec-path (concat venv-current-dir venv-executables-dir))
   ;; setup the environment for subprocesses
-  (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
+  (setenv "PATH" (concat venv-current-dir venv-executables-dir path-separator (getenv "PATH")))
   ;; keep eshell path in sync
   (setq eshell-path-env (getenv "PATH"))
   (setenv "VIRTUAL_ENV" venv-current-dir)
@@ -394,8 +399,8 @@ command (COMMAND) rather than elisp forms."
    (concat "if command -v workon >/dev/null 2>&1; then workon "
            venv-current-name
            "; else source "
-           venv-current-dir
-           "bin/activate; fi \n")))
+           venv-current-dir venv-executables-dir
+           "/activate; fi \n")))
 
 ;;;###autoload
 (defun venv-initialize-interactive-shells ()
@@ -407,12 +412,12 @@ virtualenvwrapper.el."
              (buffer-exists-already (get-buffer buffer-name)))
         (if (or buffer-exists-already (not venv-current-name))
             ad-do-it
-          (progn (setenv "PATH" (s-join ":" (venv-get-stripped-path
-                                         (s-split ":" (getenv "PATH")))))
+          (progn (setenv "PATH" (s-join path-separator (venv-get-stripped-path
+                                         (s-split path-separator (getenv "PATH")))))
                  (setenv "VIRTUAL_ENV" nil)
                  ad-do-it
                  (venv-shell-init buffer-name)
-               (setenv "PATH" (concat venv-current-dir "bin:" (getenv "PATH")))
+               (setenv "PATH" (concat venv-current-dir venv-executables-dir path-separator (getenv "PATH")))
                (setenv "VIRTUAL_ENV" venv-current-dir)))))
     (ad-activate 'shell))
 
@@ -451,3 +456,4 @@ virtualenvwrapper.el."
 
 (provide 'virtualenvwrapper)
 ;;; virtualenvwrapper.el ends here
+
