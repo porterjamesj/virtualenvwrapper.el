@@ -65,7 +65,7 @@ are stored if you use virtualenvwrapper in the shell."
 
 ;; copy from virtualenv.el
 (defvar venv-executables-dir 
-  (if (eq system-type 'windows-nt) "/Scripts" "/bin")
+  (if (eq system-type 'windows-nt) "Scripts" "bin")
   "The name of the directory containing executables. It is system
 dependent.")
 
