@@ -2,8 +2,7 @@
 
 A featureful virtualenv mode for Emacs. Emulates
 much of the functionality of Doug Hellmann's
-[virtualenvwrapper](https://bitbucket.org/dhellmann/virtualenvwrapper/)
-for Emacs.
+[virtualenvwrapper](https://bitbucket.org/dhellmann/virtualenvwrapper/).
 
 ## Features
 
@@ -165,8 +164,8 @@ noninteracively as `(venv-rmvirtualenv "name")`.
 
 #### `venv-lsvirtualenv`
 
-Display all available virtualenvs in a help buffer. If you want to get use this
-noninteractively, use `(venv-list-virtualenvs)`.
+Display all available virtualenvs in a help buffer. Also callable
+noninteractively as `(venv-list-virtualenvs)`.
 
 #### `venv-cdvirtualenv`
 
@@ -277,7 +276,7 @@ automatically, we can just add a python-mode hook:
                               (venv-workon project-venv-name)))
 ```
 
-The call to `hack-local-variables` is necessary beacuse by default
+The call to `hack-local-variables` is necessary because by default
 mode-hooks are run before directory local variables are set, so we
 have to do that explicitly in the hook in order to have access to
 them.
