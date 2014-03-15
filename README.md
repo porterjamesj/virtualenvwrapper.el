@@ -318,6 +318,23 @@ More about customizing the eshell prompt
 Open an issue or a PR! I'm happy to pull in contributions or take
 suggestions for improvements.
 
+### Hacking
+
+I use [Cask](http://cask.github.io/) to manage dependacies and
+[ert-runner](https://github.com/rejeep/ert-runner.el) for testing. To
+get started:
+
+1. [install cask](http://cask.github.io/installation/)
+2. Install dependacies with `cask install --dev`
+3. Verify that the tests pass with `cask exec ert-runner`
+
+The tests are pretty rudimentary integration tests but they verify that
+all the basic functionality works.
+
+If you're planning on submitting a PR, please make sure that the tests pass
+before you do so. Thanks!
+
+
 ### License
 
 Copyright (C) 2013 James J. Porter

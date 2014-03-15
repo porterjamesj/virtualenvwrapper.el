@@ -1,10 +1,10 @@
-;;; virtualenvwrapper.el --- a modern virtualenv tool for Emacs
+;;; virtualenvwrapper.el --- a featureful virtualenv tool for Emacs
 
 ;; Copyright (C) 2013 James J Porter
 
 ;; Author: James J Porter <porterjamesj@gmail.com>
 ;; URL: http://github.com/porterjamesj/virtualenvwrapper.el
-;; Version: 20130805
+;; Version: 20131514
 ;; Keywords: python, virtualenv, virtualenvwrapper
 ;; Package-Requires: ((dash "1.5.0") (s "1.6.1"))
 
@@ -64,10 +64,9 @@ are stored if you use virtualenvwrapper in the shell."
 (defvar venv-current-dir nil "Directory of current virtualenv.")
 
 ;; copy from virtualenv.el
-(defvar venv-executables-dir 
+(defvar venv-executables-dir
   (if (eq system-type 'windows-nt) "Scripts" "bin")
-  "The name of the directory containing executables. It is system
-dependent.")
+  "The name of the directory containing executables. It is system dependent.")
 
 ;; internal utility functions
 
@@ -315,7 +314,7 @@ we are immediately in that directory."
 ;;;###autoload
 (defun venv-cpvirtualenv (&optional name newname)
   "Copy virtualenv NAME to NEWNAME. Any arguments not passed will be
-prompprted for This comes with the same caveat as cpvirtualenv in the
+prompted for This comes with the same caveat as cpvirtualenv in the
 original virtualenvwrapper, which is that is far from guarenteed to
 work well. Many packages hardcode absolute paths in various places an
 will break if moved to a new location. Use with caution. If used with
@@ -456,4 +455,3 @@ virtualenvwrapper.el."
 
 (provide 'virtualenvwrapper)
 ;;; virtualenvwrapper.el ends here
-
