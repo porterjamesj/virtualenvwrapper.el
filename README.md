@@ -38,10 +38,12 @@ much of the functionality of Doug Hellmann's
 * If you have your virtualenvs spread around the filesystem rather
   than in one directory, just set venv-location to be a list of
   paths to each virtualenv. For example:
+
   ```lisp
   (setq venv-location '("/path/to/project1-env/"
                         "/path/to/ptoject2-env/"))
   ```
+  
   Notice that the final directory of each path has a different name.
   The mode uses this fact to disambiguate virtualenvs from each other,
   so for now it is required.
