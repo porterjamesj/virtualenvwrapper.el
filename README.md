@@ -275,7 +275,8 @@ automatically, we can just add a python-mode hook:
 ```lisp
 (add-hook 'python-mode-hook (lambda ()
                               (hack-local-variables)
-                              (venv-workon project-venv-name)))
+                              (when (boundp 'project-venv-name)
+                                (venv-workon project-venv-name))))
 ```
 
 The call to `hack-local-variables` is necessary because by default
