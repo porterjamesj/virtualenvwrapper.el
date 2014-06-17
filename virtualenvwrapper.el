@@ -423,9 +423,10 @@ virtualenvwrapper.el."
 
 ;; eshell
 
-(defun venv--gen-fun (command)
-  `(defun ,(intern (format "pcomplete/eshell-mode/%s" command)) ()
-     (pcomplete-here* (venv-get-candidates))))
+(eval-and-compile
+  (defun venv--gen-fun (command)
+    `(defun ,(intern (format "pcomplete/eshell-mode/%s" command)) ()
+       (pcomplete-here* (venv-get-candidates)))))
 
 (defmacro venv--make-pcompletions (commands)
   `(progn ,@(-map #'venv--gen-fun commands)))
