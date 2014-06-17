@@ -441,7 +441,7 @@ virtualenvwrapper.el."
   (defun eshell/deactivate () (venv-deactivate))
   (defun eshell/rmvirtualenv (&rest args) (apply #'venv-rmvirtualenv args))
   (defun eshell/mkvirtualenv (&rest args) (apply #'venv-mkvirtualenv args))
-  (defun eshell/cpvirtualenv (&rest argas) (apply #'venv-cpvirtualenv args))
+  (defun eshell/cpvirtualenv (&rest args) (apply #'venv-cpvirtualenv args))
   (defun eshell/cdvirtualenv (&optional arg) (venv-cdvirtualenv arg))
   (defun eshell/lsvirtualenv () (venv-list-virtualenvs))
   (defun eshell/allvirtualenv (&rest command)
