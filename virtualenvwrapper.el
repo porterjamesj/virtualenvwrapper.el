@@ -45,7 +45,7 @@
   :group 'python)
 
 (defcustom venv-location
-  (expand-file-name "~/.virtualenvs/")
+  (expand-file-name (or (getenv "WORKON_HOME") "~/.virtualenvs/"))
   "The location(s) of your virtualenvs. This
 can be either a string, which indicates a single directory in which
 you keep all your virutalenvs, or a list of strings, in which case it
