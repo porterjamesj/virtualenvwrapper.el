@@ -1,6 +1,6 @@
 # virtualenvwrapper.el
 
-[![Build Status](https://travis-ci.org/porterjamesj/Gumbo.jl.svg?branch=master)](https://travis-ci.org/porterjamesj/Gumbo.jl)
+[![Build Status](https://travis-ci.org/porterjamesj/virtualenvwrapper.el.svg?branch=master)](https://travis-ci.org/porterjamesj/virtualenvwrapper.el)
 
 A featureful virtualenv mode for Emacs. Emulates
 much of the functionality of Doug Hellmann's
