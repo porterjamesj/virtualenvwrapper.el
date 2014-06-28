@@ -1,5 +1,7 @@
 # virtualenvwrapper.el
 
+[![Build Status](https://travis-ci.org/porterjamesj/Gumbo.jl.svg?branch=master)](https://travis-ci.org/porterjamesj/Gumbo.jl)
+
 A featureful virtualenv mode for Emacs. Emulates
 much of the functionality of Doug Hellmann's
 [virtualenvwrapper](https://bitbucket.org/dhellmann/virtualenvwrapper/).
@@ -43,7 +45,7 @@ much of the functionality of Doug Hellmann's
   (setq venv-location '("/path/to/project1-env/"
                         "/path/to/ptoject2-env/"))
   ```
-  
+
   Notice that the final directory of each path has a different name.
   The mode uses this fact to disambiguate virtualenvs from each other,
   so for now it is required.
