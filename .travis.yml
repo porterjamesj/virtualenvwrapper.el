@@ -16,8 +16,8 @@ before_install:
   - export PATH="/home/travis/.cask/bin:$PATH"
   - cask
   - mkdir /tmp/venvs
-  - export TMPDIR=/tmp/venvs
 env:
   - EMACS=emacs24
+  - TMPDIR=/tmp/venvs
 script:
   cask exec ert-runner
