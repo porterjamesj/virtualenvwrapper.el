@@ -17,7 +17,6 @@ before_install:
   - cask
   - mkdir /tmp/venvs
 env:
-  - EMACS=emacs24
-  - TMPDIR=/tmp/venvs
+  - EMACS=emacs24 TMPDIR=/tmp/venvs
 script:
   cask exec ert-runner
