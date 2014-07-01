@@ -10,21 +10,27 @@
 
 (setq venv-tmp-env "emacs-venvwrapper-test")
 
+(defmacro with-temp-location (&rest forms)
+  `(let ((venv-location temporary-file-directory))
+     (unwind-protect
+         (progn
+           ,@forms))))
+
+
 (defmacro with-temp-env (name &rest forms)
-  (let ((venv-location temporary-file-directory))
-    `(unwind-protect
+  `(let ((venv-location temporary-file-directory))
+     (unwind-protect
          (progn
            (venv-mkvirtualenv ,name)
            ,@forms)
        (venv-rmvirtualenv ,name))))
 
 (ert-deftest venv-mkvirtualenv-works ()
-  (unwind-protect
-      (progn
-        (venv-mkvirtualenv venv-tmp-env)
-        (should (equal venv-current-name venv-tmp-env))
-        (venv-deactivate))
-    (venv-rmvirtualenv venv-tmp-env)))
+  (with-temp-location
+   (venv-mkvirtualenv venv-tmp-env)
+   (should (equal venv-current-name venv-tmp-env))
+   (venv-deactivate)
+   (venv-rmvirtualenv venv-tmp-env)))
 
 (ert-deftest venv-rmvirtualenv-works ()
   (let ((venv-location temporary-file-directory))
