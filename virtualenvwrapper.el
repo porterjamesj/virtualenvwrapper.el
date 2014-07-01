@@ -63,6 +63,18 @@ are stored if you use virtualenvwrapper in the shell."
 
 (defvar venv-current-dir nil "Directory of current virtualenv.")
 
+(defvar venv-pre-activate-hooks nil
+  "Hooks run before a virtualenv is activated.")
+
+(defvar venv-post-activate-hooks nil
+  "Hooks run after a virtualenv is activated.")
+
+(defvar venv-pre-deactivate-hooks nil
+  "Hooks run before a virtualenv is deactivated.")
+
+(defvar venv-post-deactivate-hooks nil
+  "Hooks run after a virtualenv is deactivated.")
+
 ;; copy from virtualenv.el
 (defvar venv-executables-dir
   (if (eq system-type 'windows-nt) "Scripts" "bin")
@@ -186,6 +198,7 @@ prompting the user with the string PROMPT"
 (defun venv-deactivate ()
   "Deactivate the current venv."
   (interactive)
+  (run-hooks 'venv-pre-deactivate-hooks)
   (setq python-shell-virtualenv-path nil)
   (setq exec-path (venv-get-stripped-path exec-path))
   (setenv "PATH" (s-join path-separator
@@ -195,6 +208,7 @@ prompting the user with the string PROMPT"
   (setq venv-current-name nil)
   (setq venv-current-dir nil)
   (setq eshell-path-env (getenv "PATH"))
+  (run-hooks 'venv-post-deactivate-hooks)
   (when (called-interactively-p 'interactive)
     (message "virtualenv deactivated")))
 
@@ -218,6 +232,7 @@ interactively."
       ;; then read
       (setq venv-current-name
             (venv-read-name "Virtualenv to switch to: "))))
+  (run-hooks 'venv-pre-activate-hooks)
   (setq venv-current-dir
         (venv-name-to-dir venv-current-name))
   ;; push it onto the history
@@ -231,6 +246,7 @@ interactively."
   ;; keep eshell path in sync
   (setq eshell-path-env (getenv "PATH"))
   (setenv "VIRTUAL_ENV" venv-current-dir)
+  (run-hooks 'venv-post-activate-hooks)
   (when (called-interactively-p 'interactive)
     (message (concat "Switched to virtualenv: " venv-current-name))))
 
