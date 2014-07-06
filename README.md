@@ -110,7 +110,7 @@ interested to see how robust it is.
 
 ### Eshell
 
-Support for eshell is turned on by calling `venv-initialize-eshell`.
+support for eshell is turned on by calling `venv-initialize-eshell`.
 After doing this, any new eshells you launch will be in the correct
 virtualenv and have access to installed executables, etc. The mode
 also provides a variety of virtualenvwrapper commands that work
@@ -237,19 +237,33 @@ by Emacs. How to do some of them are described below.
 This mode doesn't provide any. I don't presume to know how you want
 your keybindings, you can bind them to whatever you want! Go crazy!
 
-### Advising
+### Hooks
 
-Virtualenvwrapper lets you write shell scripts that run as hooks after you
-take certain actions, such as creating or deleting a virtualenv. This mode
-doesn't provide something similar, because emacs itself already does in the
-form of
-[advice](https://www.gnu.org/software/emacs/manual/html_node/elisp/Advising-Functions.html). For example, you could advise the mkvirtualenv function to install
-commonly used tools when a new virtualenv is created:
+Virtualenvwrapper lets you write shell scripts that run as hooks after
+you take certain actions, such as creating or deleting a
+virtualenv. This package provides Emacs
+[hooks](https://www.gnu.org/software/emacs/manual/html_node/emacs/Hooks.html),
+to achieve the same thing. The complete list of hooks is:
+
+```
+venv-premkvirtualenv-hook
+venv-postmkvirtualenv-hook
+venv-prermvirtualenv-hook
+venv-postrmvirtualenv-hook
+venv-preactivate-hook
+venv-postactivate-hook
+venv-predeactivate-hook
+venv-postdeactivate-hook
+```
+
+each of which is run when you would expect based on the name.
+
+For example, to install commonly used packages when a new virtualenv is
+created you could modify the `venv-postmkvirtualenv-hook` as follows:
 
 ```lisp
-(defadvice venv-mkvirtualenv (after install-common-tools)
-    "Install commonly used packages in new virtualenvs."
-    (shell-command "pip install flake8 nose jedi"))
+(add-hook 'venv-postmkvirtualenv-hook
+          (lambda () (shell-command "pip install nose flake8 jedi")))
 ```
 
 ### Automatically activating a virtualenv in a particular project
