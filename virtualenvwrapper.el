@@ -381,20 +381,21 @@ directory."
 
 ;; macros and functions supporting executing elisp or
 ;; shell commands in a particular venv
-
-(defmacro venv-with-virtualenv (name &rest forms)
-  "Evaluate FORMS with venv NAME active. NAME must be a string
+(eval-and-compile
+  (defmacro venv-with-virtualenv (name &rest forms)
+    "Evaluate FORMS with venv NAME active. NAME must be a string
 identifying a virtualenv."
-  `(progn
-     (let ((prev-dir default-directory)
-           (prev-env venv-current-name))
-       (venv-workon ,name) ;; switch it up
-       (cd venv-current-dir)
-       ,@forms ;; evalulate forms
-       (if prev-env ;; switch back
-           (venv-workon prev-env)
+    `(progn
+       (let ((prev-dir default-directory)
+             (prev-env venv-current-name))
+         (venv-workon ,name) ;; switch it up
+         (cd venv-current-dir)
+         ,@forms ;; evalulate forms
+         (if prev-env ;; switch back
+             (venv-workon prev-env)
            (venv-deactivate))
-       (cd prev-dir))))
+         (cd prev-dir)))))
+
 
 (defmacro venv-allvirtualenv (&rest forms)
   "For each virtualenv, activate it, switch to its directory,
