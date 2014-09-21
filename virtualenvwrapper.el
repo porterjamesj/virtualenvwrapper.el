@@ -292,11 +292,11 @@ default-directory."
       (when (called-interactively-p 'interactive)
         (message (concat "Created virtualenv: " it)))))
   ;; workon the last venv we made
-    (venv-workon (car (last names))))
+  (venv-workon (car (last names))))
 
 ;;;###autoload
 (defun venv-rmvirtualenv (&rest names)
-"Delete virtualenvs NAMES."
+  "Delete virtualenvs NAMES."
   (interactive)
   ;; deactivate first
   (venv-deactivate)
@@ -488,7 +488,6 @@ virtualenvwrapper.el."
   (venv--make-pcompletions ("workon" "rmvirtualenv"
                             "cdvirtualenv" "cpvirtualenv"))
   (message "Eshell virtualenv support initialized."))
-
 
 (provide 'virtualenvwrapper)
 ;;; virtualenvwrapper.el ends here
