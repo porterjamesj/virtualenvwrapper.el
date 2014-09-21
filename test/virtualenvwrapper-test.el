@@ -97,3 +97,30 @@
          (venv-cpvirtualenv venv-tmp-env "copy-of-tmp-env")
          (should (s-contains? "copy-of-tmp-env" (venv-list-virtualenvs))))
      (venv-rmvirtualenv "copy-of-tmp-env"))))
+
+
+;; tests for hooks
+
+
+(ert-deftest venv-activate-hooks ()
+  (let ((preactivate nil)
+        (postactivate nil)
+        (venv-preactivate-hook '((lambda () (setq preactivate "yes"))))
+        (venv-postactivate-hook '((lambda () (setq postactivate "yes")))))
+  (with-temp-env
+   venv-tmp-env
+   (should (equal preactivate "yes"))
+   (should (equal postactivate "yes")))))
+
+(ert-deftest venv-mkvenv-hooks ()
+  (let ((venv-premkvirtualenv-hook '((lambda ()
+                                       (setq preactivated "yes"))))
+        (venv-postmkvirtualenv-hook '((lambda ()
+                                        (setq postactivated "yes")
+                                        (setq name venv-current-name)))))
+    (with-temp-env
+     venv-tmp-env
+     (venv-deactivate)
+     (should (equal preactivated "yes"))
+     (should (equal postactivated "yes"))
+     (should (equal name venv-tmp-env)))))
