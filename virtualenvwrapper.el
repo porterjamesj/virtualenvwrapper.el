@@ -265,6 +265,25 @@ interactively."
   (when (called-interactively-p 'interactive)
     (message (concat "Switched to virtualenv: " venv-current-name))))
 
+
+;; for hilarious reasons to do with bytecompiling, this has to be here
+;; instead of below
+(defmacro venv-with-virtualenv (name &rest forms)
+  "Evaluate FORMS with venv NAME active. NAME must be a string
+identifying a virtualenv."
+  `(progn
+     (let ((prev-dir default-directory)
+           (prev-env venv-current-name))
+       (venv-workon ,name) ;; switch it up
+       (cd venv-current-dir)
+       (unwind-protect
+           (progn
+             ,@forms) ;; evalulate forms
+         (if prev-env ;; switch back
+             (venv-workon prev-env)
+           (venv-deactivate))
+         (cd prev-dir)))))
+
 ;;;###autoload
 (defun venv-mkvirtualenv (&rest names)
 "Create new virtualenvs NAMES. If venv-location is a single
@@ -381,21 +400,6 @@ directory."
 
 ;; macros and functions supporting executing elisp or
 ;; shell commands in a particular venv
-(eval-and-compile
-  (defmacro venv-with-virtualenv (name &rest forms)
-    "Evaluate FORMS with venv NAME active. NAME must be a string
-identifying a virtualenv."
-    `(progn
-       (let ((prev-dir default-directory)
-             (prev-env venv-current-name))
-         (venv-workon ,name) ;; switch it up
-         (cd venv-current-dir)
-         ,@forms ;; evalulate forms
-         (if prev-env ;; switch back
-             (venv-workon prev-env)
-           (venv-deactivate))
-         (cd prev-dir)))))
-
 
 (defmacro venv-allvirtualenv (&rest forms)
   "For each virtualenv, activate it, switch to its directory,
