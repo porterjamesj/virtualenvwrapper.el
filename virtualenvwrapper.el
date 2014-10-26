@@ -284,6 +284,18 @@ identifying a virtualenv."
            (venv-deactivate))
          (cd prev-dir)))))
 
+(defun venv--check-executable ()
+  "Verify that there is a virtualenv executable available,
+throwing an error if not"
+  (unless (executable-find "virtualenv")
+    (error "There doesn't appear to be a virtualenv executable on
+    your exec path. Unsure that you have virtualenv installed and
+    that the exec-path variable is set such that virtualenv can
+    be found. A common cause of problems like this is GUI Emacs
+    not having environment variables set up like the shell. Check
+    out https://github.com/purcell/exec-path-from-shell for a
+    robust solution to this problem.")))
+
 ;;;###autoload
 (defun venv-mkvirtualenv (&rest names)
 "Create new virtualenvs NAMES. If venv-location is a single
@@ -291,6 +303,7 @@ directory, the new virtualenvs are made there; if it is a list of
 directories, the new virtualenvs are made in the current
 default-directory."
   (interactive)
+  (venv--check-executable)
   (let ((parent-dir (if (stringp venv-location)
                         (file-name-as-directory
                          (expand-file-name venv-location))
