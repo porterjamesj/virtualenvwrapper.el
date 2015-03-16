@@ -224,12 +224,16 @@ interactively."
         (venv-deactivate)
         ;; then switch
         (setq venv-current-name name))
-    (progn
-      ;; if without argument, deactivate first
+    ;; if without argument, deactivate first
+    (let ((old-venv venv-current-name))
       (venv-deactivate)
       ;; then read
-      (setq venv-current-name
-            (venv-read-name "Virtualenv to switch to: "))))
+      (setq
+       venv-current-name
+       (venv-read-name
+        (if old-venv
+            (format "Choose a virtualenv (currently %s): " old-venv)
+          "Choose a virtualenv: ")))))
   (run-hooks 'venv-preactivate-hook)
   (setq venv-current-dir
         (venv-name-to-dir venv-current-name))
