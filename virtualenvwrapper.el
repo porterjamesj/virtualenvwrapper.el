@@ -21,8 +21,6 @@
 (require 'dash)
 (require 's)
 
-(defconst venv-default-python (executable-find "python"))
-
 ;; customizable variables
 
 (defgroup virtualenvwrapper nil
@@ -281,20 +279,9 @@ throwing an error if not"
     out https://github.com/purcell/exec-path-from-shell for a
     robust solution to this problem.")))
 
-(defun venv-is-actually-executable (path)
-  (and (file-executable-p path)
-       (not (file-directory-p path))))
-
 (defun venv-get-python-executable ()
   "Do a completing read for a python executable to use in mkvirtualenv"
-  (let ((input (expand-file-name (read-file-name "Python executable: "
-                                                 venv-default-python))))
-    (if (venv-is-actually-executable input)
-        input
-      ;; the logic here is that if the input is not executable, we
-      ;; assume that someone just typed "python3" or "pypy" or some
-      ;; such, and attempt to expand it
-      (executable-find input))))
+  )
 
 ;;;###autoload
 (defun venv-mkvirtualenv (&rest names)
@@ -309,7 +296,8 @@ default-directory."
                          (expand-file-name venv-location))
                       default-directory))
         (python-exe-arg (when current-prefix-arg
-                          (concat "--python=" (venv-get-python-executable))))
+                          (concat "--python="
+                                  (read-string "Python executable: " "python"))))
         (names (if names names
                  (list (read-from-minibuffer "New virtualenv: ")))))
     ;; map over all the envs we want to make
