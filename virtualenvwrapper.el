@@ -478,6 +478,7 @@ virtualenvwrapper.el."
 (defmacro venv--make-pcompletions (commands)
   `(progn ,@(-map #'venv--gen-fun commands)))
 
+;;;###autoload
 (defun venv-initialize-eshell ()
   "Configure eshell for use with virtualenvwrapper.el."
   ;; make emacs and eshell share an environment
