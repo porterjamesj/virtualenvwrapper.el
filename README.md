@@ -51,6 +51,10 @@ much of the functionality of Doug Hellmann's
   Notice that the final directory of each path has a different name.
   The mode uses this fact to disambiguate virtualenvs from each other,
   so for now it is required.
+* You can also change easily the virtual environment location with
+  `M-x venv-set-location`. This is particularly useful when working with
+  tools such as [tox](https://testrun.org/tox/latest/) that generate virtual
+  environments dynamically.
 
 ## What do activating and deactivating actually do?
 
