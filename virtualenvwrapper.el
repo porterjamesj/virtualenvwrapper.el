@@ -211,6 +211,18 @@ prompting the user with the string PROMPT"
     (message "virtualenv deactivated")))
 
 ;;;###autoload
+(defun venv-set-location (&optional location)
+  "Set where to look for virtual environments to LOCATION.
+This is useful e.g. when using tox."
+  (interactive)
+  (when (not location)
+    (setq location (read-directory-name "New virtualenv: ")))
+  (venv-deactivate)
+  (setq venv-location location)
+  (when (called-interactively-p 'interactive)
+    (message (concat "Virtualenv location: " location))))
+
+;;;###autoload
 (defun venv-workon (&optional name)
   "Interactively switch to virtualenv NAME. Prompts for name if called
 interactively."
