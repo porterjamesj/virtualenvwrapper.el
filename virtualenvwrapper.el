@@ -1,6 +1,6 @@
 ;;; virtualenvwrapper.el --- a featureful virtualenv tool for Emacs
 
-;; Copyright (C) 2013 James J Porter
+;; Copyright (C) 2013 - 2015 James J Porter and [contributors](https://github.com/porterjamesj/virtualenvwrapper.el/graphs/contributors)
 
 ;; Author: James J Porter <porterjamesj@gmail.com>
 ;; URL: http://github.com/porterjamesj/virtualenvwrapper.el
