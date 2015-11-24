@@ -1,10 +1,10 @@
 ;;; virtualenvwrapper.el --- a featureful virtualenv tool for Emacs
 
-;; Copyright (C) 2013 James J Porter
+;; Copyright (C) 2013 - 2015 James J Porter and [contributors](https://github.com/porterjamesj/virtualenvwrapper.el/graphs/contributors)
 
 ;; Author: James J Porter <porterjamesj@gmail.com>
 ;; URL: http://github.com/porterjamesj/virtualenvwrapper.el
-;; Version: 20131514
+;; Version: 20151123
 ;; Keywords: python, virtualenv, virtualenvwrapper
 ;; Package-Requires: ((dash "1.5.0") (s "1.6.1"))
 
@@ -209,6 +209,18 @@ prompting the user with the string PROMPT"
   (run-hooks 'venv-postdeactivate-hook)
   (when (called-interactively-p 'interactive)
     (message "virtualenv deactivated")))
+
+;;;###autoload
+(defun venv-set-location (&optional location)
+  "Set where to look for virtual environments to LOCATION.
+This is useful e.g. when using tox."
+  (interactive)
+  (when (not location)
+    (setq location (read-directory-name "New virtualenv: ")))
+  (venv-deactivate)
+  (setq venv-location location)
+  (when (called-interactively-p 'interactive)
+    (message (concat "Virtualenv location: " location))))
 
 ;;;###autoload
 (defun venv-workon (&optional name)
