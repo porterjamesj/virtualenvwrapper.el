@@ -43,10 +43,7 @@
 (ert-deftest venv-workon-works ()
   (with-temp-env
    venv-tmp-env
-   (setq  gud-pdb-command-name "test")
    (venv-deactivate)
-   ;; M-x pdb should ask to run "test"
-   (should (equal gud-pdb-command-name "test"))
    (venv-workon venv-tmp-env)
    ;; M-x pdb should ask to run "python -m pdb"
    (should (equal gud-pdb-command-name "python -m pdb"))
@@ -64,10 +61,9 @@
 (ert-deftest venv-deactivate-works ()
   (with-temp-env
    venv-tmp-env
-   (setq  gud-pdb-command-name "test")
    (venv-deactivate)
-   ;; M-x pdb should ask to run "test"
-   (should (equal gud-pdb-command-name "test"))
+   ;; M-x pdb should ask to run "pdb"
+   (should (equal gud-pdb-command-name "pdb"))
    ;; we remove the name correctly
    (should (equal venv-current-name nil))
    ;; we change the python path back
