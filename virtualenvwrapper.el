@@ -84,13 +84,11 @@ are stored if you use virtualenvwrapper in the shell."
 
 (defun venv--set-venv-gud-pdb-command-name ()
   "When in a virtual env, call pdb as \\[python -m pdb]."
-    (custom-set-variables
-   '(gud-pdb-command-name "python -m pdb")))
+  (setq gud-pdb-command-name "python -m pdb"))
 
 (defun venv--set-system-gud-pdb-command-name ()
   "Set the system \\[pdb] command."
-  (custom-set-variables
-   '(gud-pdb-command-name venv-system-gud-pdb-command-name)))
+  (setq gud-pdb-command-name venv-system-gud-pdb-command-name))
 
 
 (defun venv-clear-history ()
