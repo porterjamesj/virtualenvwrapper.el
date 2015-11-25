@@ -21,6 +21,9 @@
 (require 'dash)
 (require 's)
 
+;; needed to set gud-pdb-command-name
+(require 'gud)
+
 ;; customizable variables
 
 (defgroup virtualenvwrapper nil
