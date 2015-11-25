@@ -8,6 +8,9 @@
 (load (expand-file-name "virtualenvwrapper.el" default-directory))
 (require 's)
 
+;; needed to ensure that gud-pdb-command-name is not void.
+(require 'gud)
+
 (setq venv-tmp-env "emacs-venvwrapper-test")
 
 (defmacro with-temp-location (&rest forms)
