@@ -11,10 +11,13 @@
 ;;
 ;; Then C-c v away
 
+;;; Code:
+
+(require 'virtualenvwrapper)
 
 ;;;###autoload
 (defun helm-venv-workon ()
-  "Like venv-work, for helm."
+  "Like venv-workon, for helm."
   (interactive)
   (helm :sources '(helm-source-venv)))
 
@@ -26,3 +29,6 @@
     (action . (("activate" . venv-workon)))
     (persistent-action . venv-workon)
     (persistent-help . "Activate the virtualenv.")))
+
+(provide 'helm-virtualenvwrapper)
+;;; helm-virtualenvwrapper.el ends here
