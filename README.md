@@ -152,10 +152,16 @@ All will do what would expect.
 Prompts for the name of a virtualenv and activates it as described
 above. Can also be called noninteractively as `(venv-workon "name")`.
 
+When called, it sets `gud-pdb-command-name` to `python -m pdb` so that
+`M-x pdb` can be used inside the virtual environment.
+
 #### `venv-deactivate`
 
 Deactivates your current virtualenv, undoing everything that `venv-workon`
 did. This can also be called noninteractively as `(venv-deactivate)`.
+
+When called, it sets `gud-pdb-command-name` to its default value
+(usually `pdb`).
 
 #### `venv-mkvirtualenv`
 

@@ -21,6 +21,9 @@
 (require 'dash)
 (require 's)
 
+;; needed to set gud-pdb-command-name
+(require 'gud)
+
 ;; customizable variables
 
 (defgroup virtualenvwrapper nil
@@ -72,6 +75,8 @@ are stored if you use virtualenvwrapper in the shell."
 
 (defvar venv-current-dir nil "Directory of current virtualenv.")
 
+(defvar venv-system-gud-pdb-command-name gud-pdb-command-name
+  "Whatever `gud-pdb-command-name' is (usually \\[pdb]).")
 
 ;; copy from virtualenv.el
 (defvar venv-executables-dir
@@ -79,6 +84,15 @@ are stored if you use virtualenvwrapper in the shell."
   "The name of the directory containing executables. It is system dependent.")
 
 ;; internal utility functions
+
+(defun venv--set-venv-gud-pdb-command-name ()
+  "When in a virtual env, call pdb as \\[python -m pdb]."
+  (setq gud-pdb-command-name "python -m pdb"))
+
+(defun venv--set-system-gud-pdb-command-name ()
+  "Set the system \\[pdb] command."
+  (setq gud-pdb-command-name venv-system-gud-pdb-command-name))
+
 
 (defun venv-clear-history ()
   (setq venv-history nil))
@@ -206,6 +220,7 @@ prompting the user with the string PROMPT"
   (setq venv-current-name nil)
   (setq venv-current-dir nil)
   (setq eshell-path-env (getenv "PATH"))
+  (venv--set-system-gud-pdb-command-name)
   (run-hooks 'venv-postdeactivate-hook)
   (when (called-interactively-p 'interactive)
     (message "virtualenv deactivated")))
@@ -260,6 +275,7 @@ interactively."
   ;; keep eshell path in sync
   (setq eshell-path-env (getenv "PATH"))
   (setenv "VIRTUAL_ENV" venv-current-dir)
+  (venv--set-venv-gud-pdb-command-name)
   (run-hooks 'venv-postactivate-hook)
   (when (called-interactively-p 'interactive)
     (message (concat "Switched to virtualenv: " venv-current-name))))
