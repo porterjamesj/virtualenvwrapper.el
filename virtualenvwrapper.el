@@ -6,7 +6,7 @@
 ;; URL: http://github.com/porterjamesj/virtualenvwrapper.el
 ;; Version: 20131514
 ;; Keywords: python, virtualenv, virtualenvwrapper
-;; Package-Requires: ((dash "1.5.0") (s "1.6.1"))
+;; Package-Requires: ((dash "1.5.0") (s "1.6.1") (exec-path-from-shell "1.10"))
 
 ;;; Commentary:
 
@@ -20,6 +20,7 @@
 
 (require 'dash)
 (require 's)
+(require 'exec-path-from-shell)
 
 ;; customizable variables
 
@@ -28,7 +29,8 @@
   :group 'python)
 
 (defcustom venv-location
-  (expand-file-name (or (getenv "WORKON_HOME") "~/.virtualenvs/"))
+  (expand-file-name (or (exec-path-from-shell-getenv "WORKON_HOME")
+                        "~/.virtualenvs/"))
   "The location(s) of your virtualenvs. This
 can be either a string, which indicates a single directory in which
 you keep all your virutalenvs, or a list of strings, in which case it
