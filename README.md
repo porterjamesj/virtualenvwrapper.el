@@ -75,7 +75,7 @@ will describe *exactly* what happens when you activate a virtualenv:
    directory so that any tools that depend on this variable function
    correctly (one such tool is
    [jedi](http://tkf.github.io/emacs-jedi/)).
-4. The virtualenv's `bin` directory added to the `exec-path`, so that
+4. The virtualenv's `bin` directory is added to the `exec-path`, so that
    Emacs itself can find the environment's installed executables. This is
    useful, for example, if you want to have Emacs spawn a subprocess
    running an executable installed in a virtualenv.
@@ -103,7 +103,7 @@ call `shell`, the shell will start in the correct virtualenv. This
 detects whether or not you have virtualenvwrapper.sh installed and does
 the right thing in either case.  Note that changing the virtualenv in
 Emacs will not affect any running shells and vice-versa; they are
-independant processes.
+independent processes.
 
 #### WARNINGS
 
@@ -170,13 +170,13 @@ all kept in the same directory (i.e. `venv-location` is a string),
 then the new virtualenv will be created in that directory. If you keep
 your virtualenvs in different places (i.e. `venv-location` is a
 list), then the new virtualenv will be created in the current default
-directory. Also callable noninteracively as `(venv-mkvirtualenv
+directory. Also callable noninteractively as `(venv-mkvirtualenv
 "name")`.
 
 #### `venv-rmvirtualenv`
 
 Prompt for the name of a virutalenv and delete it. Also callable
-noninteracively as `(venv-rmvirtualenv "name")`.
+noninteractively as `(venv-rmvirtualenv "name")`.
 
 #### `venv-lsvirtualenv`
 
@@ -194,7 +194,7 @@ to the `bin` directory of the currently active virtualenv, call
 #### `venv-cpvirtualenv`
 
 Makes a new virtualenv that is a copy of an existing one. Prompts for
-the names of both. *WARNING* This comes with same caveat as the
+the names of both. *WARNING* This comes with the same caveat as the
 corresponding command in the original virtualenvwrapper, which is that
 some packages hardcode their locations when being installed, so
 creating new virtualenvs in this manner may cause them to break. Use
@@ -216,7 +216,7 @@ Will message the path of `myenv`'s directory. There's also a
 each virtualenv in turn, moves to its directory, and executes the
 given forms.
 
-Since its common to want to execute shell commands, there are
+Since it's common to want to execute shell commands, there are
 convenience macros, `venv-with-virtualenv-shell-command` and
 `venv-allvirtualenv-shell-command`, which take a string, interpreted
 as a shell command, and do exactly what you'd expect. So for example,
@@ -280,7 +280,7 @@ created you could modify the `venv-postmkvirtualenv-hook` as follows:
 
 ### Automatically activating a virtualenv in a particular project
 
-Its also common to want to have a virtualenv automatically activated
+It's also common to want to have a virtualenv automatically activated
 when you open a file in a certain project. This mode provides no
 special way to do this because once again Emacs has already done it in
 the form of
@@ -351,7 +351,7 @@ suggestions for improvements.
 
 ### Hacking
 
-I use [Cask](http://cask.github.io/) to manage dependacies and
+I use [Cask](http://cask.github.io/) to manage dependencies and
 [ert-runner](https://github.com/rejeep/ert-runner.el) for testing. To
 get started:
 
