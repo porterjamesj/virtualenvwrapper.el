@@ -40,6 +40,13 @@ The default location is ~/.virtualenvs/, which is where your virtualenvs
 are stored if you use virtualenvwrapper in the shell."
   :group 'virtualenvwrapper)
 
+(defcustom 'venv-dirlookup-names
+  '(".venv")
+  "Virtualenvs to search in the projectile-project-root
+to activate when one of them is found."
+  :type (repeat :tag "List of directories" file)
+  :group 'virtualenvwrapper)
+
 ;; hooks
 
 (defvar venv-premkvirtualenv-hook nil
@@ -93,6 +100,13 @@ are stored if you use virtualenvwrapper in the shell."
   "Set the system \\[pdb] command."
   (setq gud-pdb-command-name venv-system-gud-pdb-command-name))
 
+(defun venv-projectile-auto-workon ()
+  "If a venv in the projetile root exists, calls venv-workon it.
+Set your common venvs names in `venv-dirlookup-names'"
+  (let ((path (--first
+               (file-exists-p (concat (projectile-project-root) it))
+               venv-dirlookup-names)))
+    (when path (venv-workon path))))
 
 (defun venv-clear-history ()
   (setq venv-history nil))
