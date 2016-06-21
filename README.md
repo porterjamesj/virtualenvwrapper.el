@@ -293,6 +293,47 @@ project's root directory with something like:
 ((python-mode . ((eval . (venv-workon "myproject-env")))))
 ```
 
+Now whenever you open one of this project's python files, you will
+have a variable `project-venv-name` set to the name of the project's
+virtualenv.
+
+### Automatically activating a virtualenv when using projectile
+
+If you're using [projectile](https://github.com/bbatsov/projectile)
+there's an easier way to automatically activate a virtualenv when
+entering a project.
+
+You just have to call `(venv-projectile-auto-workon)` after switching
+projects, this can be achieved hooking the call to the action
+`projectile-switch-project-action` like this:
+
+```lisp
+(setq projectile-switch-project-action 'venv-projectile-auto-workon)
+```
+
+If you relay on another use for this action, then just add a `lambda`
+instead:
+
+```lisp
+(setq projectile-switch-project-action
+      '(lambda ()
+         (venv-projectile-auto-workon)
+         (projectile-find-file)))
+```
+
+As long as a virtualenv is found in the `projectile-project-root` and
+whose name is `.venv` it will be automatically activated. If you tend
+to name your virtualenvs differently (e.g. _pyenv_ or _.virtual_) just
+be sure to add those extra names to the `venv-dirlookup-names` list.
+
+```lisp
+(setq venv-dirlookup-names '(".venv" "pyenv" ".virtual"))
+```
+
+You can add as many names you need, the first one found in the current
+project will be activated.
+
+>>>>>>> Add support to auto-activate virtualenv found in projetile-project-root
 ### Displaying the currently active virtualenv on the mode line
 
 The name of the currently active virtualenv is stored in the variable
