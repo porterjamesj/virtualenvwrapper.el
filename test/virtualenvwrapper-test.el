@@ -139,7 +139,6 @@
 (ert-deftest venv-set-location-works ()
   (let ((expected-venv-location "test location")
         (original-venv-location venv-location))
-    (should (equal venv-location (expand-file-name "~/.virtualenvs/")))
     (venv-set-location expected-venv-location)
     (should (equal venv-location expected-venv-location))
     (setq venv-location original-venv-location)))
