@@ -40,11 +40,11 @@ The default location is ~/.virtualenvs/, which is where your virtualenvs
 are stored if you use virtualenvwrapper in the shell."
   :group 'virtualenvwrapper)
 
-(defcustom 'venv-dirlookup-names
+(defcustom venv-dirlookup-names
   '(".venv")
   "Virtualenvs to search in the projectile-project-root
 to activate when one of them is found."
-  :type (repeat :tag "List of directories" file)
+  :type '(repeat file)
   :group 'virtualenvwrapper)
 
 ;; hooks
