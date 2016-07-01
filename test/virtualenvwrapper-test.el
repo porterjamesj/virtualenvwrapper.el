@@ -7,6 +7,7 @@
 
 (load (expand-file-name "virtualenvwrapper.el" default-directory))
 (require 's)
+(require 'cl)
 
 (setq venv-tmp-env "emacs-venvwrapper-test")
 
@@ -24,6 +25,22 @@
            (venv-mkvirtualenv ,name)
            ,@forms)
        (venv-rmvirtualenv ,name))))
+
+(defun venv-activated? ()
+  "Runs various assertions to check if a venv is activated."
+  (and
+   ;; M-x pdb should ask to run "python -m pdb"
+   (equal gud-pdb-command-name "python -m pdb")
+   ;; we store the name correctly
+   (equal venv-current-name venv-tmp-env)
+   ;; we change the path for python mode
+   (s-contains? venv-tmp-env python-shell-virtualenv-path)
+   ;; we set PATH for shell and subprocesses
+   (s-contains? venv-tmp-env (getenv "PATH"))
+   ;; we set VIRTUAL_ENV for jedi and whoever else needs it
+   (s-contains? venv-tmp-env (getenv "VIRTUAL_ENV"))
+   ;; we add our dir to exec-path
+   (s-contains? venv-tmp-env (car exec-path))))
 
 (ert-deftest venv-mkvirtualenv-works ()
   (with-temp-location
@@ -45,18 +62,7 @@
    venv-tmp-env
    (venv-deactivate)
    (venv-workon venv-tmp-env)
-   ;; M-x pdb should ask to run "python -m pdb"
-   (should (equal gud-pdb-command-name "python -m pdb"))
-   ;; we store the name correctly
-   (should (equal venv-current-name venv-tmp-env))
-   ;; we change the path for python mode
-   (should (s-contains? venv-tmp-env python-shell-virtualenv-path))
-   ;; we set PATH for shell and subprocesses
-   (should (s-contains? venv-tmp-env (getenv "PATH")))
-   ;; we set VIRTUAL_ENV for jedi and whoever else needs it
-   (should (s-contains? venv-tmp-env (getenv "VIRTUAL_ENV")))
-   ;; we add our dir to exec-path
-   (should (s-contains? venv-tmp-env (car exec-path)))))
+   (should (venv-activated?))))
 
 (ert-deftest venv-deactivate-works ()
   (with-temp-env
@@ -136,3 +142,12 @@
     (venv-set-location expected-venv-location)
     (should (equal venv-location expected-venv-location))
     (setq venv-location original-venv-location)))
+
+(ert-deftest venv-projectile-auto-workon-works ()
+  (with-temp-env
+   venv-tmp-env
+   (flet ((projectile-project-root () temporary-file-directory))
+     (setq venv-dirlookup-names (list venv-tmp-env))
+     (venv-deactivate)
+     (venv-projectile-auto-workon)
+     (should (venv-activated?)))))
