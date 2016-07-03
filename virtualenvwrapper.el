@@ -385,7 +385,8 @@ default-directory."
                                           (venv-dir-to-name locs))))
                      venv-location)))
     (run-hooks 'venv-postrmvirtualenv-hook)
-    (message (concat "Deleted virtualenv: " it))))
+    (when (called-interactively-p)
+      (message (concat "Deleted virtualenv: " it)))))
 
 ;;;###autoload
 (defun venv-lsvirtualenv ()
