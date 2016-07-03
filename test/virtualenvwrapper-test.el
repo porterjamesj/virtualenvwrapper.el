@@ -26,21 +26,23 @@
            ,@forms)
        (venv-rmvirtualenv ,name))))
 
-(defun venv-activated? ()
+(defun assert-venv-activated ()
   "Runs various assertions to check if a venv is activated."
-  (and
-   ;; M-x pdb should ask to run "python -m pdb"
-   (equal gud-pdb-command-name "python -m pdb")
-   ;; we store the name correctly
-   (equal venv-current-name venv-tmp-env)
-   ;; we change the path for python mode
-   (s-contains? venv-tmp-env python-shell-virtualenv-path)
-   ;; we set PATH for shell and subprocesses
-   (s-contains? venv-tmp-env (getenv "PATH"))
-   ;; we set VIRTUAL_ENV for jedi and whoever else needs it
-   (s-contains? venv-tmp-env (getenv "VIRTUAL_ENV"))
-   ;; we add our dir to exec-path
-   (s-contains? venv-tmp-env (car exec-path))))
+  ;; M-x pdb should ask to run "python -m pdb"
+  (should (equal gud-pdb-command-name "python -m pdb"))
+  ;; we store the name correctly
+  (should (s-contains? venv-tmp-env venv-current-name))
+  ;; assert that the current dir exists and is asbolute
+  (should (file-name-absolute-p venv-current-dir))
+  (should (file-directory-p venv-current-dir))
+  ;; we change the path for python mode
+  (should (s-contains? venv-tmp-env python-shell-virtualenv-path))
+  ;; we set PATH for shell and subprocesses
+  (should (s-contains? venv-tmp-env (getenv "PATH")))
+  ;; we set VIRTUAL_ENV for jedi and whoever else needs it
+  (should (s-contains? venv-tmp-env (getenv "VIRTUAL_ENV")))
+  ;; we add our dir to exec-path
+  (should (s-contains? venv-tmp-env (car exec-path))))
 
 (ert-deftest venv-mkvirtualenv-works ()
   (with-temp-location
@@ -56,13 +58,12 @@
     (venv-rmvirtualenv venv-tmp-env)
     (should-error (venv-workon venv-tmp-env))))
 
-
 (ert-deftest venv-workon-works ()
   (with-temp-env
    venv-tmp-env
    (venv-deactivate)
    (venv-workon venv-tmp-env)
-   (should (venv-activated?))))
+   (assert-venv-activated)))
 
 (ert-deftest venv-deactivate-works ()
   (with-temp-env
@@ -154,4 +155,4 @@
         (setq venv-dirlookup-names (list venv-tmp-env))
         (venv-deactivate)
         (venv-projectile-auto-workon)
-        (should (venv-activated?))))))
+        (assert-venv-activated)))))
