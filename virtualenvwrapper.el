@@ -90,6 +90,17 @@ to activate when one of them is found."
   (if (eq system-type 'windows-nt) "Scripts" "bin")
   "The name of the directory containing executables. It is system dependent.")
 
+(defun venv-projectile-auto-workon ()
+  "If a venv in the projetile root exists, activates it.
+Set your common venvs names in `venv-dirlookup-names'"
+  (let ((path (--first
+               (file-exists-p (concat (projectile-project-root) it))
+               venv-dirlookup-names)))
+    (when path
+      (setq venv-current-name path) ;; there's really nothing that feels good to do here ;_;
+      (venv--activate-dir path))))
+
+
 ;; internal utility functions
 
 (defun venv--set-venv-gud-pdb-command-name ()
@@ -99,14 +110,6 @@ to activate when one of them is found."
 (defun venv--set-system-gud-pdb-command-name ()
   "Set the system \\[pdb] command."
   (setq gud-pdb-command-name venv-system-gud-pdb-command-name))
-
-(defun venv-projectile-auto-workon ()
-  "If a venv in the projetile root exists, calls venv-workon it.
-Set your common venvs names in `venv-dirlookup-names'"
-  (let ((path (--first
-               (file-exists-p (concat (projectile-project-root) it))
-               venv-dirlookup-names)))
-    (when path (venv-workon path))))
 
 (defun venv-clear-history ()
   (setq venv-history nil))
