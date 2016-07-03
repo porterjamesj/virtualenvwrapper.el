@@ -41,7 +41,7 @@ are stored if you use virtualenvwrapper in the shell."
   :group 'virtualenvwrapper)
 
 (defcustom venv-dirlookup-names
-  '(".venv")
+  '(".venv" "venv")
   "Virtualenvs to search in the projectile-project-root
 to activate when one of them is found."
   :type '(repeat file)
