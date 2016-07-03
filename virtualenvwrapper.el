@@ -188,7 +188,7 @@ virtualenv. PATH should be a list of strings specifiying directories."
 
 (defun venv--purge-history (candidates)
   "Remove history candidates that are not present in the list CANDIDATES"
-  (setq venv-history (-filter (lambda (s) (not (-contains? candidates s)))
+  (setq venv-history (-filter (lambda (s) (-contains? candidates s))
                               venv-history)))
 
 (defun venv-is-valid (name)
