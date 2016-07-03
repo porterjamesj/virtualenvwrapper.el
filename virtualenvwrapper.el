@@ -206,6 +206,22 @@ prompting the user with the string PROMPT"
 (defun venv-list-virtualenvs ()
   (s-join "\n" (venv-get-candidates)))
 
+(defun venv--activate-dir (dir)
+  "Given a directory corresponding to a virtualenv, activate it"
+  (run-hooks 'venv-preactivate-hook)
+  (setq venv-current-dir dir)
+  ;; setup the python shell
+  (setq python-shell-virtualenv-path venv-current-dir)
+  ;; setup emacs exec-path
+  (add-to-list 'exec-path (concat venv-current-dir venv-executables-dir))
+  ;; setup the environment for subprocesses
+  (setenv "PATH" (concat venv-current-dir venv-executables-dir path-separator (getenv "PATH")))
+  ;; keep eshell path in sync
+  (setq eshell-path-env (getenv "PATH"))
+  (setenv "VIRTUAL_ENV" venv-current-dir)
+  (venv--set-venv-gud-pdb-command-name)
+  (run-hooks 'venv-postactivate-hook))
+
 
 ;; potentially interactive user-exposed functions
 
@@ -264,25 +280,12 @@ interactively."
         (if old-venv
             (format "Choose a virtualenv (currently %s): " old-venv)
           "Choose a virtualenv: ")))))
-  (run-hooks 'venv-preactivate-hook)
-  (setq venv-current-dir
-        (venv-name-to-dir venv-current-name))
   ;; push it onto the history
   (add-to-list 'venv-history venv-current-name)
-  ;; setup the python shell
-  (setq python-shell-virtualenv-path venv-current-dir)
-  ;; setup emacs exec-path
-  (add-to-list 'exec-path (concat venv-current-dir venv-executables-dir))
-  ;; setup the environment for subprocesses
-  (setenv "PATH" (concat venv-current-dir venv-executables-dir path-separator (getenv "PATH")))
-  ;; keep eshell path in sync
-  (setq eshell-path-env (getenv "PATH"))
-  (setenv "VIRTUAL_ENV" venv-current-dir)
-  (venv--set-venv-gud-pdb-command-name)
-  (run-hooks 'venv-postactivate-hook)
+  ;; actually activate it
+  (venv--activate-dir (venv-name-to-dir venv-current-name))
   (when (called-interactively-p 'interactive)
     (message (concat "Switched to virtualenv: " venv-current-name))))
-
 
 ;; for hilarious reasons to do with bytecompiling, this has to be here
 ;; instead of below
