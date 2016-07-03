@@ -7,7 +7,7 @@
 
 (load (expand-file-name "virtualenvwrapper.el" default-directory))
 (require 's)
-(require 'cl)
+(require 'noflet)
 
 (setq venv-tmp-env "emacs-venvwrapper-test")
 
@@ -145,9 +145,13 @@
 
 (ert-deftest venv-projectile-auto-workon-works ()
   (with-temp-env
-   venv-tmp-env
-   (flet ((projectile-project-root () temporary-file-directory))
-     (setq venv-dirlookup-names (list venv-tmp-env))
-     (venv-deactivate)
-     (venv-projectile-auto-workon)
-     (should (venv-activated?)))))
+    venv-tmp-env
+    ;; the reason for setting a bogus venv-location here is that the
+    ;; venv-location shouldn't matter, projectile-auto-workon should happen
+    ;; indepedent of it's being set or not
+    (let ((venv-location "bogus"))
+      (noflet ((projectile-project-root () temporary-file-directory))
+        (setq venv-dirlookup-names (list venv-tmp-env))
+        (venv-deactivate)
+        (venv-projectile-auto-workon)
+        (should (venv-activated?))))))
