@@ -177,20 +177,9 @@ of names that can be used in the completing read."
 (defun venv-get-stripped-path (path)
   "Return what the PATH would look like if we weren't in a
 virtualenv. PATH should be a list of strings specifiying directories."
-  (let ((func (if (stringp venv-location)
-                  (lambda (s) (not (s-contains?
-                                    (file-name-as-directory
-                                     (expand-file-name
-                                      venv-location)) (or s default-directory))))
-                (lambda (execs)
-                  (not (-filter (lambda (locs)
-                                  (s-contains?
-                                   (file-name-as-directory
-                                    (expand-file-name locs))
-                                   (file-name-as-directory
-                                    (expand-file-name execs))))
-                                venv-location))))))
-  (-filter func path)))
+  (-filter
+    (lambda (s) (not (s-equals? s (concat venv-current-dir venv-executables-dir))))
+    path))
 
 
 (defun venv--purge-history (candidates)
