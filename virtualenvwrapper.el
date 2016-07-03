@@ -94,8 +94,9 @@ to activate when one of them is found."
   "If a venv in the projetile root exists, activates it.
 Set your common venvs names in `venv-dirlookup-names'"
   (let ((path (--first
-               (file-exists-p (concat (projectile-project-root) it))
-               venv-dirlookup-names)))
+                (file-exists-p it)
+                (-map (lambda (f) (concat (projectile-project-root) f))
+                        venv-dirlookup-names))))
     (when path
       (setq venv-current-name path) ;; there's really nothing that feels good to do here ;_;
       (venv--activate-dir path))))
