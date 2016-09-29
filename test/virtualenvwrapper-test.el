@@ -7,6 +7,7 @@
 
 (load (expand-file-name "virtualenvwrapper.el" default-directory))
 (require 's)
+(require 'noflet)
 
 (setq venv-tmp-env "emacs-venvwrapper-test")
 
@@ -25,6 +26,24 @@
            ,@forms)
        (venv-rmvirtualenv ,name))))
 
+(defun assert-venv-activated ()
+  "Runs various assertions to check if a venv is activated."
+  ;; M-x pdb should ask to run "python -m pdb"
+  (should (equal gud-pdb-command-name "python -m pdb"))
+  ;; we store the name correctly
+  (should (s-contains? venv-tmp-env venv-current-name))
+  ;; assert that the current dir exists and is asbolute
+  (should (file-name-absolute-p venv-current-dir))
+  (should (file-directory-p venv-current-dir))
+  ;; we change the path for python mode
+  (should (s-contains? venv-tmp-env python-shell-virtualenv-path))
+  ;; we set PATH for shell and subprocesses
+  (should (s-contains? venv-tmp-env (getenv "PATH")))
+  ;; we set VIRTUAL_ENV for jedi and whoever else needs it
+  (should (s-contains? venv-tmp-env (getenv "VIRTUAL_ENV")))
+  ;; we add our dir to exec-path
+  (should (s-contains? venv-tmp-env (car exec-path))))
+
 (ert-deftest venv-mkvirtualenv-works ()
   (with-temp-location
    (venv-mkvirtualenv venv-tmp-env)
@@ -39,24 +58,12 @@
     (venv-rmvirtualenv venv-tmp-env)
     (should-error (venv-workon venv-tmp-env))))
 
-
 (ert-deftest venv-workon-works ()
   (with-temp-env
    venv-tmp-env
    (venv-deactivate)
    (venv-workon venv-tmp-env)
-   ;; M-x pdb should ask to run "python -m pdb"
-   (should (equal gud-pdb-command-name "python -m pdb"))
-   ;; we store the name correctly
-   (should (equal venv-current-name venv-tmp-env))
-   ;; we change the path for python mode
-   (should (s-contains? venv-tmp-env python-shell-virtualenv-path))
-   ;; we set PATH for shell and subprocesses
-   (should (s-contains? venv-tmp-env (getenv "PATH")))
-   ;; we set VIRTUAL_ENV for jedi and whoever else needs it
-   (should (s-contains? venv-tmp-env (getenv "VIRTUAL_ENV")))
-   ;; we add our dir to exec-path
-   (should (s-contains? venv-tmp-env (car exec-path)))))
+   (assert-venv-activated)))
 
 (ert-deftest venv-deactivate-works ()
   (with-temp-env
@@ -132,7 +139,19 @@
 (ert-deftest venv-set-location-works ()
   (let ((expected-venv-location "test location")
         (original-venv-location venv-location))
-    (should (equal venv-location (expand-file-name "~/.virtualenvs/")))
     (venv-set-location expected-venv-location)
     (should (equal venv-location expected-venv-location))
     (setq venv-location original-venv-location)))
+
+(ert-deftest venv-projectile-auto-workon-works ()
+  (with-temp-env
+    venv-tmp-env
+    ;; the reason for setting a bogus venv-location here is that the
+    ;; venv-location shouldn't matter, projectile-auto-workon should happen
+    ;; indepedent of it's being set or not
+    (let ((venv-location "bogus"))
+      (noflet ((projectile-project-root () temporary-file-directory))
+        (setq venv-dirlookup-names (list venv-tmp-env))
+        (venv-deactivate)
+        (venv-projectile-auto-workon)
+        (assert-venv-activated)))))

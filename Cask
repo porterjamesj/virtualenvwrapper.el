@@ -6,4 +6,5 @@
 (depends-on "dash" "1.5.0")
 
 (development
- (depends-on "ert-runner"))
+ (depends-on "ert-runner")
+ (depends-on "noflet"))
