@@ -284,33 +284,14 @@ It's also common to want to have a virtualenv automatically activated
 when you open a file in a certain project. This mode provides no
 special way to do this because once again Emacs has already done it in
 the form of
-[per-directory local variables](https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html)
-and
-[mode hooks](https://www.gnu.org/software/emacs/manual/html_node/emacs/Hooks.html). In
-order to have a virtualenv automatically activated when you open a
+[per-directory local variables](https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html).
+In order to have a virtualenv automatically activated when you open a
 python file in a particular project, you could put a `.dir-locals.el` in the
 project's root directory with something like:
 
 ```lisp
-((python-mode . ((project-venv-name . "myproject-env"))))
+((python-mode . ((eval . (venv-workon "myproject-env")))))
 ```
-
-Now whenever you open one of this project's python files, you will
-have a variable `project-venv-name` set to the name of the project's
-virtualenv. In order to cause this venv to be activated
-automatically, we can just add a python-mode hook:
-
-```lisp
-(add-hook 'python-mode-hook (lambda ()
-                              (hack-local-variables)
-                              (when (boundp 'project-venv-name)
-                                (venv-workon project-venv-name))))
-```
-
-The call to `hack-local-variables` is necessary because by default
-mode-hooks are run before directory local variables are set, so we
-have to do that explicitly in the hook in order to have access to
-them.
 
 ### Displaying the currently active virtualenv on the mode line
 
