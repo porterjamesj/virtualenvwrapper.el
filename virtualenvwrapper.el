@@ -34,7 +34,7 @@
   (expand-file-name (or (getenv "WORKON_HOME") "~/.virtualenvs/"))
   "The location(s) of your virtualenvs. This
 can be either a string, which indicates a single directory in which
-you keep all your virutalenvs, or a list of strings, in which case it
+you keep all your virtualenvs, or a list of strings, in which case it
 specifies disparate locations in which all your virtualenvs are kept.
 The default location is ~/.virtualenvs/, which is where your virtualenvs
 are stored if you use virtualenvwrapper in the shell."
@@ -314,7 +314,7 @@ identifying a virtualenv."
 throwing an error if not"
   (unless (executable-find "virtualenv")
     (error "There doesn't appear to be a virtualenv executable on
-    your exec path. Unsure that you have virtualenv installed and
+    your exec path. Ensure that you have virtualenv installed and
     that the exec-path variable is set such that virtualenv can
     be found. A common cause of problems like this is GUI Emacs
     not having environment variables set up like the shell. Check
