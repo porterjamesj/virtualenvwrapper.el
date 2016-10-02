@@ -265,25 +265,19 @@ This is useful e.g. when using tox."
   "Interactively switch to virtualenv NAME. Prompts for name if called
 interactively."
   (interactive)
-  (if name
-      ;; if called with argument, make sure it is valid
-      (progn
-        (when (not (venv-is-valid name))
-          (error "Invalid virtualenv specified!"))
-        ;; then deactivate
-        (venv-deactivate)
-        ;; then switch
-        (setq venv-current-name name))
-    ;; if without argument, deactivate first
-    (let ((old-venv venv-current-name))
-      (venv-deactivate)
-      ;; then read
-      (setq
-       venv-current-name
-       (venv-read-name
-        (if old-venv
-            (format "Choose a virtualenv (currently %s): " old-venv)
-          "Choose a virtualenv: ")))))
+  ;; if without argument, read from user
+  (unless name
+    (setq name (venv-read-name
+                (if venv-current-name
+                    (format "Choose a virtualenv (currently %s): " venv-current-name)
+                  "Choose a virtualenv: "))))
+  ;; validate name
+  (when (not (venv-is-valid name))
+    (error (format "Invalid virtualenv %s specified!" name)))
+  ;; then deactivate
+  (venv-deactivate)
+  ;; then switch
+  (setq venv-current-name name)
   ;; push it onto the history
   (add-to-list 'venv-history venv-current-name)
   ;; actually activate it
