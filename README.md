@@ -300,10 +300,6 @@ project's root directory with something like:
 ((python-mode . ((eval . (venv-workon "myproject-env")))))
 ```
 
-Now whenever you open one of this project's python files, you will
-have a variable `project-venv-name` set to the name of the project's
-virtualenv.
-
 ### Automatically activating a virtualenv when using projectile
 
 If you're using [projectile](https://github.com/bbatsov/projectile)
