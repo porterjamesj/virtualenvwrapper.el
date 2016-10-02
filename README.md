@@ -375,11 +375,11 @@ suggestions for improvements.
 
 ### Hacking
 
-I use [Cask](http://cask.github.io/) to manage dependencies and
+I use [Cask](http://cask.readthedocs.io/en/latest/) to manage dependencies and
 [ert-runner](https://github.com/rejeep/ert-runner.el) for testing. To
 get started:
 
-1. [install cask](http://cask.github.io/installation/)
+1. [install cask](http://cask.readthedocs.io/en/latest/guide/installation.html)
 2. Install dependacies with `cask install --dev`
 3. Verify that the tests pass with `cask exec ert-runner`
 
