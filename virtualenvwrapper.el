@@ -223,9 +223,17 @@ prompting the user with the string PROMPT"
   ;; keep eshell path in sync
   (setq eshell-path-env (getenv "PATH"))
   (setenv "VIRTUAL_ENV" venv-current-dir)
+  (venv--switch-to-project-dir)
   (venv--set-venv-gud-pdb-command-name)
   (run-hooks 'venv-postactivate-hook))
 
+(defun venv--switch-to-project-dir ()
+  "If we find the project file, cd into that directory"
+  (let ((proj-file (expand-file-name ".project" venv-current-dir)))
+    (when (file-exists-p proj-file)
+      (cd (with-temp-buffer
+            (insert-file-contents proj-file)
+            (string-trim (buffer-string)))))))
 
 ;; potentially interactive user-exposed functions
 
