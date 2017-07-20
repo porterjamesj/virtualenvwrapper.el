@@ -332,10 +332,11 @@ instead:
          (projectile-find-file)))
 ```
 
-As long as a virtualenv is found in the `projectile-project-root` and
-whose name is in the list `venv-dirlookup-names` it will be
-automatically activated. By default, it's value is `'(".venv", "venv")'`,
-but you can set if however you like to match your naming conventions:
+As long as a virtualenv or a text file with the name of the virtualenv is
+found in the `projectile-project-root` and whose name is in the list
+`venv-dirlookup-names` it will be automatically activated. By default, it's
+value is `'(".venv", "venv")'`, but you can set if however you like to match
+your naming conventions:
 
 ```lisp
 (setq venv-dirlookup-names '(".venv" "pyenv" ".virtual"))
