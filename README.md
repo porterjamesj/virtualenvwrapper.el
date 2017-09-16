@@ -180,6 +180,12 @@ list), then the new virtualenv will be created in the current default
 directory. Also callable noninteractively as `(venv-mkvirtualenv
 "name")`.
 
+#### `venv-mkvirtualenv-using`
+
+Supplying a prefix command (`C-u`) to `venv-mkvirtualenv` will prompt
+for a Python interpreter to use. You can use this function to specify
+the interpreter noninteractively.
+
 #### `venv-rmvirtualenv`
 
 Prompt for the name of a virutalenv and delete it. Also callable
