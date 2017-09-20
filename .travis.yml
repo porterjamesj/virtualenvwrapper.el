@@ -7,7 +7,7 @@ addons:
       - python-pip
 env:
   global:
-    - PATH="~/.evm/bin:~/.cask/bin:$PATH"
+    - PATH=~/.evm/bin:~/.cask/bin:$PATH
   matrix:
     - EVM_EMACS=emacs-24.5-travis
     - EVM_EMACS=emacs-25.1-travis
@@ -20,6 +20,7 @@ before_install:
   - evm config path /tmp
   - evm install $EVM_EMACS
   - evm use $EVM_EMACS
+  - hash -r
   - curl -fsSkL https://raw.github.com/cask/cask/master/go | python
   - cask install
 script:
