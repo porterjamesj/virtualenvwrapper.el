@@ -213,7 +213,7 @@ prompting the user with the string PROMPT"
 (defun venv--activate-dir (dir)
   "Given a directory corresponding to a virtualenv, activate it"
   (run-hooks 'venv-preactivate-hook)
-  (setq venv-current-dir dir)
+  (setq venv-current-dir (file-name-as-directory dir))
   ;; setup the python shell
   (setq python-shell-virtualenv-path venv-current-dir)
   ;; setup emacs exec-path
