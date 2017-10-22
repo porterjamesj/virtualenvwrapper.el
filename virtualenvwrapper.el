@@ -254,7 +254,7 @@ prompting the user with the string PROMPT"
 This is useful e.g. when using tox."
   (interactive)
   (when (not location)
-    (setq location (read-directory-name "New virtualenv: ")))
+    (setq location (read-directory-name "New virtualenv location: " venv-location)))
   (venv-deactivate)
   (setq venv-location location)
   (when (called-interactively-p 'interactive)
