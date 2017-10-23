@@ -219,9 +219,13 @@ prompting the user with the string PROMPT"
   ;; setup emacs exec-path
   (add-to-list 'exec-path (concat venv-current-dir venv-executables-dir))
   ;; setup the environment for subprocesses
-  (setenv "PATH" (concat venv-current-dir venv-executables-dir path-separator (getenv "PATH")))
-  ;; keep eshell path in sync
-  (setq eshell-path-env (getenv "PATH"))
+  (let ((path (concat venv-current-dir
+               venv-executables-dir
+               path-separator
+               (getenv "PATH"))))
+    (setenv "PATH" path)
+    ;; keep eshell path in sync
+    (setq eshell-path-env path))
   (setenv "VIRTUAL_ENV" venv-current-dir)
   (venv--set-venv-gud-pdb-command-name)
   (run-hooks 'venv-postactivate-hook))
