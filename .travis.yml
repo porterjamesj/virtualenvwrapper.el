@@ -1,23 +1,28 @@
-language: emacs-lisp
+language: generic
 sudo: false
 dist: trusty
-before_install:
-  - git clone https://github.com/rejeep/evm.git ~/.evm
-  - evm config path /tmp
-  - evm install $EVM_EMACS
-  - evm use $EVM_EMACS
-  - sudo apt-get install -y python-pip
-  - sudo pip install virtualenv
-  - curl -fsSkL https://raw.github.com/cask/cask/master/go | python
-  - cask
+addons:
+  apt:
+    packages:
+      - python-pip
 env:
   global:
-      - PATH="~/.evm/bin:~/.cask/bin:$PATH"
+    - PATH=~/.evm/bin:~/.cask/bin:$PATH
   matrix:
     - EVM_EMACS=emacs-24.5-travis
     - EVM_EMACS=emacs-25.1-travis
     - EVM_EMACS=emacs-25.2-travis
     - EVM_EMACS=emacs-25.3-travis
-    - EVM_EMACS=emacs-git-snapshot-travis
+    # - EVM_EMACS=emacs-git-snapshot-travis
+before_install:
+  - pip install -U --user virtualenv
+  - curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash
+  - evm config path /tmp
+  - evm install $EVM_EMACS
+  - evm use $EVM_EMACS
+  - hash -r
+  - curl -fsSkL https://raw.github.com/cask/cask/master/go | python
+  - cask exec emacs --version
+  - cask install
 script:
-  cask exec ert-runner
+  - cask exec ert-runner

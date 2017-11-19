@@ -8,6 +8,7 @@
 (load (expand-file-name "virtualenvwrapper.el" default-directory))
 (require 's)
 (require 'noflet)
+(require 'with-simulated-input)
 
 (setq venv-tmp-env "emacs-venvwrapper-test")
 
@@ -58,6 +59,60 @@
     (venv-rmvirtualenv venv-tmp-env)
     (should-error (venv-workon venv-tmp-env))))
 
+(ert-deftest venv-mkvirtualenv-select-default-interpreter ()
+  (with-temp-location
+   (let ((current-prefix-arg '(4)))
+     (with-simulated-input
+      "RET"
+      (venv-mkvirtualenv venv-tmp-env))
+     (should (equal venv-current-name venv-tmp-env))
+     (venv-deactivate)
+     (venv-rmvirtualenv venv-tmp-env))))
+
+(ert-deftest venv-mkvirtualenv-select-different-interpreter ()
+  (with-temp-location
+   (let ((current-prefix-arg '(4)))
+     (with-simulated-input
+      (concat (executable-find "python") " RET")
+      (venv-mkvirtualenv venv-tmp-env))
+     (should (equal venv-current-name venv-tmp-env))
+     (venv-deactivate)
+     (venv-rmvirtualenv venv-tmp-env))))
+
+(ert-deftest venv-mkvirtualenv-using-default-interpreter-works ()
+  (with-temp-location
+   (venv-mkvirtualenv-using nil venv-tmp-env)
+   (should (equal venv-current-name venv-tmp-env))
+   (venv-deactivate)
+   (venv-rmvirtualenv venv-tmp-env)))
+
+(ert-deftest venv-mkvirtualenv-using-different-interpreter-works ()
+  (with-temp-location
+   (venv-mkvirtualenv-using (executable-find "python") venv-tmp-env)
+   (should (equal venv-current-name venv-tmp-env))
+   (venv-deactivate)
+   (venv-rmvirtualenv venv-tmp-env)))
+
+(ert-deftest venv-mkvirtualenv-using-select-default-interpreter ()
+  (with-temp-location
+   (with-simulated-input
+    "RET"
+   (let ((current-prefix-arg '(4)))
+     (venv-mkvirtualenv-using "some invalid interpreter" venv-tmp-env)))
+   (should (equal venv-current-name venv-tmp-env))
+   (venv-deactivate)
+   (venv-rmvirtualenv venv-tmp-env)))
+
+(ert-deftest venv-mkvirtualenv-using-select-different-interpreter ()
+  (with-temp-location
+   (with-simulated-input
+    (concat (executable-find "python") " RET")
+    (let ((current-prefix-arg '(4)))
+      (venv-mkvirtualenv-using "some invalid interpreter" venv-tmp-env)))
+     (should (equal venv-current-name venv-tmp-env))
+     (venv-deactivate)
+     (venv-rmvirtualenv venv-tmp-env)))
+
 (ert-deftest venv-workon-works ()
   (with-temp-env
    venv-tmp-env
@@ -82,7 +137,7 @@
    ;; we remove out dir to exec-path
    (should (not (s-contains? venv-tmp-env (car exec-path)))))
 
-(ert-deftest venv-workon-errors-for-nonexistance ()
+(ert-deftest venv-workon-errors-for-nonexistence ()
   (should-error (venv-workon "i-hopefully-do-not-exist")))
 
 (ert-deftest venv-list-virtualenvs-works ()

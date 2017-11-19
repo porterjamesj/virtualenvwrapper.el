@@ -324,20 +324,22 @@ throwing an error if not"
   )
 
 ;;;###autoload
-(defun venv-mkvirtualenv (&rest names)
-"Create new virtualenvs NAMES. If venv-location is a single
-directory, the new virtualenvs are made there; if it is a list of
-directories, the new virtualenvs are made in the current
-default-directory."
+(defun venv-mkvirtualenv-using (interpreter &rest names)
+  "Create new virtualenvs NAMES using INTERPRETER. If venv-location
+is a single directory, the new virtualenvs are made there; if it
+is a list of directories, the new virtualenvs are made in the
+current `default-directory'."
   (interactive)
   (venv--check-executable)
-  (let ((parent-dir (if (stringp venv-location)
+  (let* ((foo (if current-prefix-arg
+                         (read-string "Python executable: ")
+                       interpreter))
+        (parent-dir (if (stringp venv-location)
                         (file-name-as-directory
                          (expand-file-name venv-location))
                       default-directory))
-        (python-exe-arg (when current-prefix-arg
-                          (concat "--python="
-                                  (read-string "Python executable: " "python"))))
+        (python-exe-arg (when foo
+                          (concat "--python=" foo)))
         (names (if names names
                  (list (read-from-minibuffer "New virtualenv: ")))))
     ;; map over all the envs we want to make
@@ -355,6 +357,15 @@ default-directory."
         (message (concat "Created virtualenv: " it))))
     ;; workon the last venv we made
     (venv-workon (car (last names)))))
+
+;;;###autoload
+(defun venv-mkvirtualenv (&rest names)
+  "Create new virtualenvs NAMES. If venv-location is a single
+directory, the new virtualenvs are made there; if it is a list of
+directories, the new virtualenvs are made in the current
+`default-directory'."
+  (interactive)
+  (apply #'venv-mkvirtualenv-using nil names))
 
 ;;;###autoload
 (defun venv-rmvirtualenv (&rest names)

@@ -1,3 +1,4 @@
+(source gnu)
 (source melpa)
 
 (package "virtualenvwrapper" "20140315" "a featureful virtualenv tool for Emacs")
@@ -7,4 +8,5 @@
 
 (development
  (depends-on "ert-runner")
- (depends-on "noflet"))
+ (depends-on "noflet")
+ (depends-on "with-simulated-input"))
