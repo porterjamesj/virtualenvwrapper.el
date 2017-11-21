@@ -5,6 +5,7 @@ addons:
   apt:
     packages:
       - python-pip
+      - gnutls-bin
 env:
   global:
     - PATH=~/.evm/bin:~/.cask/bin:$PATH
@@ -13,7 +14,8 @@ env:
     - EVM_EMACS=emacs-25.1-travis
     - EVM_EMACS=emacs-25.2-travis
     - EVM_EMACS=emacs-25.3-travis
-    # - EVM_EMACS=emacs-git-snapshot-travis
+    - EVM_EMACS=emacs-26-pretest-travis
+    - EVM_EMACS=emacs-git-snapshot-travis
 before_install:
   - pip install -U --user virtualenv
   - curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash
