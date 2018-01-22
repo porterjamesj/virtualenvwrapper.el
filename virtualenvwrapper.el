@@ -90,6 +90,7 @@ to activate when one of them is found."
   (if (eq system-type 'windows-nt) "Scripts" "bin")
   "The name of the directory containing executables. It is system dependent.")
 
+;;;###autoload
 (defun venv-projectile-auto-workon ()
   "If a venv in the projetile root exists, activates it.
 Set your common venvs names in `venv-dirlookup-names'"
