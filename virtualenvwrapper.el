@@ -338,19 +338,16 @@ throwing an error if not"
 is a single directory, the new virtualenvs are made there; if it
 is a list of directories, the new virtualenvs are made in the
 current `default-directory'."
-  (interactive)
+  (interactive "sPython executable:")
   (venv--check-executable)
-  (let* ((foo (if current-prefix-arg
-                         (read-string "Python executable: ")
-                       interpreter))
-        (parent-dir (if (stringp venv-location)
-                        (file-name-as-directory
-                         (expand-file-name venv-location))
-                      default-directory))
-        (python-exe-arg (when foo
-                          (concat "--python=" foo)))
-        (names (if names names
-                 (list (read-from-minibuffer "New virtualenv: ")))))
+  (let* ((parent-dir (if (stringp venv-location)
+                         (file-name-as-directory
+                          (expand-file-name venv-location))
+                       default-directory))
+         (python-exe-arg (when interpreter
+                           (concat "--python=" interpreter)))
+         (names (if names names
+                  (list (read-from-minibuffer "New virtualenv: ")))))
     ;; map over all the envs we want to make
     (--each names
       ;; error if this env already exists
