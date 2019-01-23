@@ -1,14 +1,13 @@
 ;; Rudimentary test suite for virtualenvwrapper.el
 
-;; WARNING I am fairly confident these tests are safe to run -- they
-;; do everything in a tmp dir and clean up after themselves. However
-;; they do modify the filesystem and filesystems are horrible, so use
-;; with caution just in case.
-
 (load (expand-file-name "virtualenvwrapper.el" default-directory))
 (require 's)
 (require 'noflet)
 (require 'with-simulated-input)
+
+;; unclear why this is required, we get `(void-function string-trim)'
+;; errors without, probably has something to do with byte-compiling
+(require 'subr-x)
 
 (setq venv-tmp-env "emacs-venvwrapper-test")
 
@@ -26,6 +25,15 @@
            (venv-mkvirtualenv ,name)
            ,@forms)
        (venv-rmvirtualenv ,name))))
+
+
+(defmacro with-temp-dir (&rest forms)
+  `(let ((temp-dir (file-name-as-directory (make-temp-file nil t))))
+     (unwind-protect
+         (progn
+           ,@forms)
+       (delete-directory temp-dir t))))
+
 
 (defun assert-venv-activated ()
   "Runs various assertions to check if a venv is activated."
@@ -210,3 +218,30 @@
         (venv-deactivate)
         (venv-projectile-auto-workon)
         (assert-venv-activated)))))
+
+(ert-deftest venv-test-auto-cd-to-project-dir-works ()
+  (with-temp-env
+    venv-tmp-env
+    (with-temp-dir
+      (venv-deactivate)
+      (should (not (equal default-directory temp-dir)))
+      ;; set the project dir to be `temp-dir'
+      (append-to-file temp-dir nil
+        (s-concat (venv-name-to-dir venv-tmp-env) ".project"))
+      (venv-workon venv-tmp-env)
+      ;; TODO should probably set these up to reset current-directory
+      ;; when done for hygeine purposes
+      (should (equal default-directory temp-dir)))))
+
+(ert-deftest venv-test-workon-does-not-cd-to-project-when-disabled ()
+  (with-temp-env
+    venv-tmp-env
+    (with-temp-dir
+      (let ((venv-workon-cd nil))
+        (venv-deactivate)
+        (should (not (equal default-directory temp-dir)))
+        ;; set the project dir to be `temp-dir'
+        (append-to-file temp-dir nil
+          (s-concat (venv-name-to-dir venv-tmp-env) ".project"))
+        (venv-workon venv-tmp-env)
+        (should (not (equal default-directory temp-dir)))))))
