@@ -52,6 +52,16 @@ to activate when one of them is found."
   :type '(repeat file)
   :group 'virtualenvwrapper)
 
+
+(defcustom venv-workon-cd
+  t
+  "If set to t, cd to the virtualenv's project root when
+activating it. Analgous to the VIRTUALENVWRAPPER_WORKON_CD
+enviornment variable in the original virtualenvwrapper"
+  :type '(boolean)
+  :group 'virtualenvwrapper)
+
+
 ;; hooks
 
 (defvar venv-premkvirtualenv-hook nil
@@ -233,7 +243,8 @@ prompting the user with the string PROMPT"
     ;; keep eshell path in sync
     (setq eshell-path-env path))
   (setenv "VIRTUAL_ENV" venv-current-dir)
-  (venv--switch-to-project-dir)
+  (if venv-workon-cd
+    (venv--switch-to-project-dir))
   (venv--set-venv-gud-pdb-command-name)
   (run-hooks 'venv-postactivate-hook))
 
