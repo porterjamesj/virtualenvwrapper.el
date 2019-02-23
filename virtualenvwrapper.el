@@ -31,9 +31,9 @@
   :group 'python)
 
 (defcustom venv-virtualenv-command "virtualenv"
-       "The command to use to run virtualenv."
-       :type '(string)
-       :group 'virtualenvwrapper)
+  "The command to use to run virtualenv."
+  :type '(string)
+  :group 'virtualenvwrapper)
 
 (defcustom venv-location
   (expand-file-name (or (getenv "WORKON_HOME") "~/.virtualenvs/"))
