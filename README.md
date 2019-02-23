@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/porterjamesj/virtualenvwrapper.el.svg?branch=master)](https://travis-ci.org/porterjamesj/virtualenvwrapper.el)
 
 [![MELPA](http://melpa.org/packages/virtualenvwrapper-badge.svg)](http://melpa.org/#/virtualenvwrapper)
+[![MELPA Stable](https://stable.melpa.org/packages/virtualenvwrapper-badge.svg)](https://stable.melpa.org/#/virtualenvwrapper)
 
 A featureful virtualenv tool for Emacs. Emulates
 much of the functionality of Doug Hellmann's
