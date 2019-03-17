@@ -20,6 +20,10 @@
 
 (require 'dash)
 (require 's)
+(require 'python)
+(require 'eshell)
+
+(declare-function projectile-project-root "projectile.el")
 
 ;; needed to set gud-pdb-command-name
 (require 'gud)
@@ -38,6 +42,7 @@ you keep all your virtualenvs, or a list of strings, in which case it
 specifies disparate locations in which all your virtualenvs are kept.
 The default location is ~/.virtualenvs/, which is where your virtualenvs
 are stored if you use virtualenvwrapper in the shell."
+  :type 'string
   :group 'virtualenvwrapper)
 
 (defcustom venv-dirlookup-names
@@ -94,6 +99,7 @@ to activate when one of them is found."
 (defun venv-projectile-auto-workon ()
   "If a venv in the projetile root exists, activates it.
 Set your common venvs names in `venv-dirlookup-names'"
+  (require 'projectile)
   (let ((path (--first
                 (file-exists-p it)
                 (--map (concat (projectile-project-root) it)
@@ -384,9 +390,10 @@ directories, the new virtualenvs are made in the current
   (venv-deactivate)
   ;; check validity and read names if necessary
   (if names
-      (--map (when (not (venv-is-valid it))
-               (error "Invalid virtualenv specified!"))
-             names)
+      (mapc (lambda (it)
+              (when (not (venv-is-valid it))
+                (error "Invalid virtualenv specified!")))
+            names)
     (setq names (list (venv-read-name "Virtualenv to delete: "))))
   ;; map over names, deleting the appropriate directory
   (--each names
@@ -403,7 +410,7 @@ directories, the new virtualenvs are made in the current
                                           (venv-dir-to-name locs))))
                      venv-location)))
     (run-hooks 'venv-postrmvirtualenv-hook)
-    (when (called-interactively-p)
+    (when (called-interactively-p 'interactive)
       (message (concat "Deleted virtualenv: " it)))))
 
 ;;;###autoload
