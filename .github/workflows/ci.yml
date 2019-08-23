@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  test:
+    name: Test with Emacs version ${{ matrix.emacs_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        emacs_version: [24.5, 25.3, 26.2]
+    
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+        architecture: 'x64'    
+    - name: Install and setup EVM
+      run: |
+        pip install -U --user virtualenv
+        curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash
+        evm config path /tmp
+        evm install emacs-${{ matrix.emacs_version }}-travis
+        evm use emacs-${{ matrix.emacs_version }}-travis
+        hash -r
+    - name: Install and setup cask
+      run: |
+        curl -fsSkL https://raw.github.com/cask/cask/master/go | python
+        cask exec emacs --version
+    - name: Install emacs deps and run tests with cask
+      run: |
+        cask install
+        cask exec ert-runner
