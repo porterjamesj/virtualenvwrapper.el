@@ -23,11 +23,10 @@ jobs:
       run: |
         sudo apt install emacs
         curl -fsSkL https://raw.github.com/cask/cask/master/go | python
+        export PATH="~/.cask/bin:$PATH"
         cask exec emacs --version
     - name: Install emacs deps and run tests with cask
       run: |
-        export PATH=~/.evm/bin:~/.cask/bin:$PATH
-        evm use emacs-${{ matrix.emacs_version }}
-        hash -r
+        export PATH="~/.cask/bin:$PATH"
         cask install
         cask exec ert-runner
