@@ -12,16 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        emacs_version: [24.5, 25.3, 26.2]
+        emacs_version: [emacs25, emacs26]
     
     steps:
     - uses: actions/checkout@v1
     - uses: actions/setup-python@v1
       with:
         python-version: '3.x'
-    - name: Install and setup cask and virtualenv
+    - name: Install and setup preliminary tools
       run: |
-        sudo apt install emacs
+        sudo add-apt-repository ppa:kelleyk/emacs
+        sudo apt update
+        sudo apt install -y ${{ matrix.emacs_version }}
         pip install virtualenv
         curl -fsSkL https://raw.github.com/cask/cask/master/go | python
         export PATH="~/.cask/bin:$PATH"
