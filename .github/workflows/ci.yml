@@ -1,15 +1,16 @@
 name: CI
 
 on:
-  push:
   pull_request:
     branches:
-    - master
+      - master
+  schedule:
+    - cron: '0 0 7 * *'  # run tests every month just to check for funny business if things are quiet
 
 jobs:
   test:
-    name: Test with Emacs version ${{ matrix.emacs_version }}
-    runs-on: ubuntu-latest
+    name: Test with ${{ matrix.emacs_version }}
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         emacs_version: [emacs25, emacs26]
