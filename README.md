@@ -1,6 +1,7 @@
 # virtualenvwrapper.el
 
-[![Build Status](https://travis-ci.org/porterjamesj/virtualenvwrapper.el.svg?branch=master)](https://travis-ci.org/porterjamesj/virtualenvwrapper.el)
+[![Travis Build Status](https://travis-ci.org/porterjamesj/virtualenvwrapper.el.svg?branch=master)](https://travis-ci.org/porterjamesj/virtualenvwrapper.el) 
+[![Github Build Status](https://github.com/porterjamesj/virtualenvwrapper.el/workflows/CI/badge.svg)](https://github.com/porterjamesj/virtualenvwrapper.el/actions)
 
 [![MELPA](http://melpa.org/packages/virtualenvwrapper-badge.svg)](http://melpa.org/#/virtualenvwrapper)
 [![MELPA Stable](https://stable.melpa.org/packages/virtualenvwrapper-badge.svg)](https://stable.melpa.org/#/virtualenvwrapper)
