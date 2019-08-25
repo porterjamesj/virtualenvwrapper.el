@@ -19,9 +19,10 @@ jobs:
     - uses: actions/setup-python@v1
       with:
         python-version: '3.x'
-    - name: Install and setup cask
+    - name: Install and setup cask and virtualenv
       run: |
         sudo apt install emacs
+        pip install virtualenv
         curl -fsSkL https://raw.github.com/cask/cask/master/go | python
         export PATH="~/.cask/bin:$PATH"
         cask exec emacs --version
