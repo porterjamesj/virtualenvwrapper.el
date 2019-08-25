@@ -29,18 +29,18 @@ jobs:
         pip install -U --user virtualenv
         curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash
         evm config path /tmp
-        evm install emacs-${{ matrix.emacs_version }}-travis
+        evm install emacs-${{ matrix.emacs_version }}
     - name: Install and setup cask
       run: |
         export PATH=~/.evm/bin:~/.cask/bin:$PATH
-        evm use emacs-${{ matrix.emacs_version }}-travis
+        evm use emacs-${{ matrix.emacs_version }}
         hash -r
         curl -fsSkL https://raw.github.com/cask/cask/master/go | python
         cask exec emacs --version
     - name: Install emacs deps and run tests with cask
       run: |
         export PATH=~/.evm/bin:~/.cask/bin:$PATH
-        evm use emacs-${{ matrix.emacs_version }}-travis
+        evm use emacs-${{ matrix.emacs_version }}
         hash -r
         cask install
         cask exec ert-runner
