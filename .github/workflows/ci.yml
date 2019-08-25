@@ -30,16 +30,17 @@ jobs:
         curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash
         evm config path /tmp
         evm install emacs-${{ matrix.emacs_version }}-travis
-        evm use emacs-${{ matrix.emacs_version }}-travis
-        hash -r
     - name: Install and setup cask
       run: |
-        sudo apt -y install emacs
-        curl -fsSkL https://raw.github.com/cask/cask/master/go | python
         export PATH=~/.evm/bin:~/.cask/bin:$PATH
+        evm use emacs-${{ matrix.emacs_version }}-travis
+        hash -r
+        curl -fsSkL https://raw.github.com/cask/cask/master/go | python
         cask exec emacs --version
     - name: Install emacs deps and run tests with cask
       run: |
         export PATH=~/.evm/bin:~/.cask/bin:$PATH
+        evm use emacs-${{ matrix.emacs_version }}-travis
+        hash -r
         cask install
         cask exec ert-runner
