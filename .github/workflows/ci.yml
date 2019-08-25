@@ -34,6 +34,7 @@ jobs:
         hash -r
     - name: Install and setup cask
       run: |
+        sudo apt -y install emacs
         curl -fsSkL https://raw.github.com/cask/cask/master/go | python
         export PATH=~/.evm/bin:~/.cask/bin:$PATH
         cask exec emacs --version
