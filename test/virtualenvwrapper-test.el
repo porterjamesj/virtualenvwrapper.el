@@ -81,8 +81,8 @@
   (with-temp-location
    (let ((current-prefix-arg '(4)))
      (with-simulated-input
-      (concat (executable-find "python") " RET")
-      (venv-mkvirtualenv venv-tmp-env))
+         '((insert (executable-find "python")) "RET")
+       (venv-mkvirtualenv venv-tmp-env))
      (should (equal venv-current-name venv-tmp-env))
      (venv-deactivate)
      (venv-rmvirtualenv venv-tmp-env))))
@@ -114,12 +114,12 @@
 (ert-deftest venv-mkvirtualenv-using-select-different-interpreter ()
   (with-temp-location
    (with-simulated-input
-    (concat (executable-find "python") " RET")
-    (let ((current-prefix-arg '(4)))
-      (venv-mkvirtualenv-using "some invalid interpreter" venv-tmp-env)))
-     (should (equal venv-current-name venv-tmp-env))
-     (venv-deactivate)
-     (venv-rmvirtualenv venv-tmp-env)))
+       '((insert (executable-find "python")) "RET")
+     (let ((current-prefix-arg '(4)))
+       (venv-mkvirtualenv-using "some invalid interpreter" venv-tmp-env)))
+   (should (equal venv-current-name venv-tmp-env))
+   (venv-deactivate)
+   (venv-rmvirtualenv venv-tmp-env)))
 
 (ert-deftest venv-workon-works ()
   (with-temp-env
