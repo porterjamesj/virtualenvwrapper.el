@@ -24,6 +24,9 @@
 ;; needed to set gud-pdb-command-name
 (require 'gud)
 
+(require 'pcomplete)
+(require 'subr-x)
+
 ;; customizable variables
 
 (defgroup virtualenvwrapper nil
@@ -43,7 +46,8 @@ you keep all your virtualenvs, or a list of strings, in which case it
 specifies disparate locations in which all your virtualenvs are kept.
 The default location is ~/.virtualenvs/, which is where your virtualenvs
 are stored if you use virtualenvwrapper in the shell."
-  :group 'virtualenvwrapper)
+  :group 'virtualenvwrapper
+  :type '(string))
 
 (defcustom venv-dirlookup-names
   '(".venv" "venv")
@@ -225,6 +229,9 @@ prompting the user with the string PROMPT"
 
 (defun venv-list-virtualenvs ()
   (s-join "\n" (venv-get-candidates)))
+
+(defvar python-shell-virtualenv-path)
+(defvar eshell-path-env)
 
 (defun venv--activate-dir (dir)
   "Given a directory corresponding to a virtualenv, activate it"
@@ -419,7 +426,7 @@ directories, the new virtualenvs are made in the current
                                           (venv-dir-to-name locs))))
                      venv-location)))
     (run-hooks 'venv-postrmvirtualenv-hook)
-    (when (called-interactively-p)
+    (when (called-interactively-p 'interactive)
       (message (concat "Deleted virtualenv: " it)))))
 
 ;;;###autoload
@@ -550,6 +557,11 @@ virtualenvwrapper.el."
 
 (defmacro venv--make-pcompletions (commands)
   `(progn ,@(-map #'venv--gen-fun commands)))
+
+(defvar eshell-modify-global-environment)
+
+(declare-function projectile-project-root "ext:projectile")
+(declare-function eshell-stringify-list "esh-util")
 
 ;;;###autoload
 (defun venv-initialize-eshell ()
