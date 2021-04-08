@@ -242,7 +242,7 @@ prompting the user with the string PROMPT"
     (setenv "PATH" path)
     ;; keep eshell path in sync
     (setq eshell-path-env path))
-  (setenv "VIRTUAL_ENV" venv-current-dir)
+  (setenv "VIRTUAL_ENV" (s-chop-suffix "/" venv-current-dir))
   (if venv-workon-cd
     (venv--switch-to-project-dir))
   (venv--set-venv-gud-pdb-command-name)
@@ -537,7 +537,7 @@ virtualenvwrapper.el."
                  ad-do-it
                  (venv-shell-init buffer-name)
                (setenv "PATH" (concat venv-current-dir venv-executables-dir path-separator (getenv "PATH")))
-               (setenv "VIRTUAL_ENV" venv-current-dir)))))
+               (setenv "VIRTUAL_ENV" (s-chop-suffix "/" venv-current-dir))))))
     (ad-activate 'shell))
 
 

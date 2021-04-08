@@ -50,6 +50,8 @@
   (should (s-contains? venv-tmp-env (getenv "PATH")))
   ;; we set VIRTUAL_ENV for jedi and whoever else needs it
   (should (s-contains? venv-tmp-env (getenv "VIRTUAL_ENV")))
+  ;; VIRTUAL_ENV does not end with "/"
+  (should (not (s-ends-with? "/" (getenv "VIRTUAL_ENV"))))
   ;; we add our dir to exec-path
   (should (s-contains? venv-tmp-env (car exec-path))))
 
