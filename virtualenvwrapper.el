@@ -114,8 +114,15 @@ Set your common venvs names in `venv-dirlookup-names'"
                 (--map (concat (projectile-project-root) it)
                         venv-dirlookup-names))))
     (when path
-      (setq venv-current-name path) ;; there's really nothing that feels good to do here ;_;
-      (venv--activate-dir path))))
+      ;; If the PATH is a regular and readable file, read the first
+      ;; string in this file and use it to active the virtualenv.
+      (if (and path (file-regular-p path) (file-readable-p path))
+          (with-temp-buffer
+            (insert-file-contents path)
+            (venv-workon (car (split-string (buffer-string) "\n" t))))
+        ;; PATH is not a file, assume it's a virtualenv directory and activate it
+        (setq venv-current-name path) ;; there's really nothing that feels good to do here ;_;
+        (venv--activate-dir path)))))
 
 
 ;; internal utility functions

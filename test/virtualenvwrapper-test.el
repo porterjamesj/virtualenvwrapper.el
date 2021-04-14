@@ -245,3 +245,21 @@
           (s-concat (venv-name-to-dir venv-tmp-env) ".project"))
         (venv-workon venv-tmp-env)
         (should (not (equal default-directory temp-dir)))))))
+
+(ert-deftest venv-projectile-auto-workon-works-with-text-file ()
+  (with-temp-env
+   venv-tmp-env
+   ;; the reason for setting a bogus venv-location here is that the
+   ;; venv-location shouldn't matter, projectile-auto-workon should happen
+   ;; indepedent of it's being set or not
+   (let* ((venv-location "bogus")
+          ;; Create a file in the projectile-project-root with
+          ;; the text content of the venv to be activated
+          (venv-tmp-text-file (make-temp-file "venv" nil nil venv-tmp-env))
+          (venv-tmp-text-name (file-name-nondirectory venv-tmp-text-file)))
+     (noflet ((projectile-project-root () temporary-file-directory))
+       (setq venv-dirlookup-names (list venv-tmp-text-name))
+       (venv-deactivate)
+       (venv-projectile-auto-workon)
+       (assert-venv-activated)
+       (delete-file venv-tmp-text-file)))))
